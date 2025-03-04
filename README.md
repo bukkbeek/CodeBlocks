@@ -8,5 +8,7 @@
 
 /guides/ there are also some guides written in markdown for R/ Python/ Unix specially relavent for bioinformatics
 
+**PCR_MM_Calculator** is a PCR Master Mix reagent calculator & printer
+
 >contents generated using Claude 3.7 Sonnet & Gemini 2.0 Flash
 >Use with caution, report bugs/ errors
