@@ -1,0 +1,752 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ReaderBlocks</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/marked/4.3.0/marked.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/highlight.min.js"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/github.min.css">
+  <style>
+    :root {
+      --bg-color: #ffffff;
+      --text-color: #333333;
+      --sidebar-bg: #f5f5f5;
+      --border-color: #e0e0e0;
+      --highlight-color: #ffff00;
+      --link-color: #0366d6;
+      --sidebar-width: 280px;
+      --header-height: 60px;
+    }
+
+    .dark-mode {
+      --bg-color: #1a1a1a;
+      --text-color: #e0e0e0;
+      --sidebar-bg: #252525;
+      --border-color: #444444;
+      --highlight-color: #5a5a00;
+      --link-color: #58a6ff;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+      background-color: var(--bg-color);
+      color: var(--text-color);
+      transition: background-color 0.3s, color 0.3s;
+    }
+
+    .container {
+      display: flex;
+      height: 100vh;
+    }
+
+    .header {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: var(--header-height);
+      background-color: var(--bg-color);
+      border-bottom: 1px solid var(--border-color);
+      display: flex;
+      align-items: center;
+      padding: 0 20px;
+      z-index: 100;
+    }
+
+    .header-title {
+      font-size: 1.2rem;
+      font-weight: 600;
+      flex-grow: 1;
+    }
+
+    .sidebar {
+      width: var(--sidebar-width);
+      height: 100vh;
+      background-color: var(--sidebar-bg);
+      border-right: 1px solid var(--border-color);
+      padding: 20px;
+      padding-top: calc(var(--header-height) + 20px);
+      overflow-y: auto;
+      transition: transform 0.3s;
+    }
+
+    .main-content {
+      flex: 1;
+      padding: 30px;
+      padding-top: calc(var(--header-height) + 30px);
+      overflow-y: auto;
+      max-width: 900px;
+      margin: 0 auto;
+    }
+
+    .controls {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      margin-bottom: 30px;
+    }
+
+    .control-group {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .control-button {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 40px;
+      height: 40px;
+      border-radius: 4px;
+      border: 1px solid var(--border-color);
+      background-color: var(--bg-color);
+      color: var(--text-color);
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .control-button:hover {
+      background-color: var(--border-color);
+    }
+
+    .control-button svg {
+      width: 20px;
+      height: 20px;
+      stroke: currentColor;
+      stroke-width: 2;
+      fill: none;
+    }
+
+    .file-input-wrapper {
+      position: relative;
+      overflow: hidden;
+      display: inline-block;
+    }
+
+    .file-input-wrapper input[type=file] {
+      position: absolute;
+      left: 0;
+      top: 0;
+      opacity: 0;
+      width: 100%;
+      height: 100%;
+      cursor: pointer;
+    }
+
+    .toc {
+      margin-top: 20px;
+    }
+
+    .toc-list {
+      list-style: none;
+    }
+
+    .toc-item {
+      margin-bottom: 8px;
+      cursor: pointer;
+      color: var(--link-color);
+    }
+
+    .toc-item:hover {
+      text-decoration: underline;
+    }
+
+    .toc-level-1 { margin-left: 0; }
+    .toc-level-2 { margin-left: 15px; }
+    .toc-level-3 { margin-left: 30px; }
+    .toc-level-4 { margin-left: 45px; }
+    .toc-level-5 { margin-left: 60px; }
+    .toc-level-6 { margin-left: 75px; }
+
+    .markdown-content {
+      line-height: 1.6;
+    }
+
+    .markdown-content h1, 
+    .markdown-content h2, 
+    .markdown-content h3, 
+    .markdown-content h4, 
+    .markdown-content h5, 
+    .markdown-content h6 {
+      margin-top: 1.5em;
+      margin-bottom: 0.5em;
+    }
+
+    .markdown-content h1 { font-size: 2em; }
+    .markdown-content h2 { font-size: 1.8em; }
+    .markdown-content h3 { font-size: 1.6em; }
+    .markdown-content h4 { font-size: 1.4em; }
+    .markdown-content h5 { font-size: 1.2em; }
+    .markdown-content h6 { font-size: 1em; }
+
+    .markdown-content p, 
+    .markdown-content ul, 
+    .markdown-content ol, 
+    .markdown-content blockquote, 
+    .markdown-content pre {
+      margin-bottom: 1em;
+    }
+
+    .markdown-content a {
+      color: var(--link-color);
+      text-decoration: none;
+    }
+
+    .markdown-content a:hover {
+      text-decoration: underline;
+    }
+
+    .markdown-content img {
+      max-width: 100%;
+      height: auto;
+    }
+
+    .markdown-content blockquote {
+      border-left: 4px solid var(--border-color);
+      padding-left: 1em;
+      color: #666;
+    }
+
+    .markdown-content pre {
+      padding: 1em;
+      overflow-x: auto;
+      background-color: rgba(0, 0, 0, 0.05);
+      border-radius: 4px;
+    }
+
+    .markdown-content code {
+      font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, Courier, monospace;
+      background-color: rgba(0, 0, 0, 0.05);
+      padding: 0.2em 0.4em;
+      border-radius: 3px;
+    }
+
+    .markdown-content pre code {
+      background-color: transparent;
+      padding: 0;
+    }
+
+    .markdown-content table {
+      border-collapse: collapse;
+      width: 100%;
+      margin-bottom: 1em;
+    }
+
+    .markdown-content table th,
+    .markdown-content table td {
+      border: 1px solid var(--border-color);
+      padding: 8px 12px;
+      text-align: left;
+    }
+
+    .markdown-content table th {
+      background-color: rgba(0, 0, 0, 0.05);
+    }
+
+    .markdown-content hr {
+      height: 1px;
+      background-color: var(--border-color);
+      border: none;
+      margin: 2em 0;
+    }
+
+    .markdown-content ul, 
+    .markdown-content ol {
+      padding-left: 2em;
+    }
+
+    .highlighted {
+      background-color: var(--highlight-color);
+    }
+
+    .task-list-item {
+      list-style-type: none;
+      margin-left: -20px;
+    }
+
+    .task-list-item input {
+      margin-right: 10px;
+    }
+
+    .definition-term {
+      font-weight: bold;
+    }
+
+    .definition-desc {
+      margin-left: 20px;
+      margin-bottom: 10px;
+    }
+
+    mark {
+      background-color: var(--highlight-color);
+    }
+
+    sup, sub {
+      font-size: 0.75em;
+    }
+
+    /* Mobile adjustments */
+    @media (max-width: 768px) {
+      .sidebar {
+        position: fixed;
+        transform: translateX(-100%);
+        z-index: 50;
+      }
+
+      .sidebar.open {
+        transform: translateX(0);
+      }
+
+      .main-content {
+        padding: 20px;
+        padding-top: calc(var(--header-height) + 20px);
+      }
+    }
+
+    /* Print styles */
+    @media print {
+      .sidebar, .header {
+        display: none;
+      }
+
+      .main-content {
+        padding: 0;
+        max-width: none;
+      }
+
+      .container {
+        display: block;
+      }
+
+      body {
+        background-color: white;
+        color: black;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <div class="header-title">ReaderBlocks</div>
+  </div>
+
+  <div class="container">
+    <div class="sidebar">
+      <div class="controls">
+        <div class="control-group">
+          <!-- Import Button -->
+          <div class="file-input-wrapper">
+            <button class="control-button" title="Import Markdown">
+              <svg viewBox="0 0 24 24">
+                <path d="M3 14v5a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-5"></path>
+                <path d="M12 3v12"></path>
+                <path d="M17 8l-5-5-5 5"></path>
+              </svg>
+            </button>
+            <input type="file" id="fileInput" accept=".md, .markdown, .txt">
+          </div>
+          
+          <!-- Zoom In Button -->
+          <button id="zoomIn" class="control-button" title="Zoom In">
+            <svg viewBox="0 0 24 24">
+              <circle cx="11" cy="11" r="8"></circle>
+              <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+              <line x1="11" y1="8" x2="11" y2="14"></line>
+              <line x1="8" y1="11" x2="14" y2="11"></line>
+            </svg>
+          </button>
+          
+          <!-- Zoom Out Button -->
+          <button id="zoomOut" class="control-button" title="Zoom Out">
+            <svg viewBox="0 0 24 24">
+              <circle cx="11" cy="11" r="8"></circle>
+              <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+              <line x1="8" y1="11" x2="14" y2="11"></line>
+            </svg>
+          </button>
+          
+          <!-- Reset Zoom Button -->
+          <button id="resetZoom" class="control-button" title="Reset Zoom">
+            <svg viewBox="0 0 24 24">
+              <path d="M3 2v6h6"></path>
+              <path d="M3 13a9 9 0 1 0 3-7.7L3 8"></path>
+            </svg>
+          </button>
+        </div>
+        
+        <div class="control-group">
+          <!-- Toggle Theme Button -->
+          <button id="toggleTheme" class="control-button" title="Toggle Dark/Light Mode">
+            <svg viewBox="0 0 24 24">
+              <path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9z"></path>
+            </svg>
+          </button>
+          
+          <!-- Start Highlight Button -->
+          <button id="startHighlight" class="control-button" title="Highlight Text">
+            <svg viewBox="0 0 24 24">
+              <path d="M3 17h18v3H3z"></path>
+              <path d="m15.5 7-8 8H6v-1.5l8-8L15.5 7Z"></path>
+              <path d="m17 5.5-1.5-1.5L14 5.5 15.5 7 17 5.5Z"></path>
+            </svg>
+          </button>
+          
+          <!-- Clear Highlights Button -->
+          <button id="clearHighlights" class="control-button" title="Clear Highlights">
+            <svg viewBox="0 0 24 24">
+              <path d="M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18Z"></path>
+              <path d="m15 9-6 6"></path>
+              <path d="m9 9 6 6"></path>
+            </svg>
+          </button>
+          
+          <!-- Print Button -->
+          <button id="printContent" class="control-button" title="Print Document">
+            <svg viewBox="0 0 24 24">
+              <path d="M6 9V2h12v7"></path>
+              <path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path>
+              <path d="M6 14h12v8H6z"></path>
+            </svg>
+          </button>
+        </div>
+      </div>
+
+      <div class="toc">
+        <ul id="tocList" class="toc-list"></ul>
+      </div>
+    </div>
+
+    <div class="main-content">
+      <div id="markdownContent" class="markdown-content"></div>
+    </div>
+  </div>
+
+  <script>
+    // Initialize marked with custom renderer for handling additional markdown features
+    marked.use({
+      renderer: {
+        // Handle task lists
+        listitem(text, task, checked) {
+          if (task) {
+            return `<li class="task-list-item"><input type="checkbox" ${checked ? 'checked' : ''} disabled> ${text}</li>`;
+          }
+          return `<li>${text}</li>`;
+        },
+        // Handle definition lists
+        paragraph(text) {
+          // Check if it's a definition term and definition
+          const defListRegex = /^(.+)\s*\n:(.+)$/;
+          const match = text.match(defListRegex);
+          
+          if (match) {
+            return `<div class="definition-term">${match[1].trim()}</div><div class="definition-desc">${match[2].trim()}</div>`;
+          }
+          
+          return `<p>${text}</p>`;
+        },
+        // Custom code renderer to support syntax highlighting
+        code(code, language) {
+          const validLanguage = !!(language && hljs.getLanguage(language));
+          const highlighted = validLanguage ? hljs.highlight(code, { language }).value : hljs.highlightAuto(code).value;
+          return `<pre><code class="hljs ${language}">${highlighted}</code></pre>`;
+        }
+      },
+      extensions: [
+        {
+          name: 'highlight',
+          level: 'inline',
+          start(src) { return src.match(/==/)?.index; },
+          tokenizer(src) {
+            const rule = /^==([^=]+)==/;
+            const match = rule.exec(src);
+            if (match) {
+              return {
+                type: 'highlight',
+                raw: match[0],
+                text: match[1].trim()
+              };
+            }
+            return undefined;
+          },
+          renderer(token) {
+            return `<mark>${token.text}</mark>`;
+          }
+        },
+        {
+          name: 'superscript',
+          level: 'inline',
+          start(src) { return src.match(/\^/)?.index; },
+          tokenizer(src) {
+            const rule = /^\^([^\^]+)\^/;
+            const match = rule.exec(src);
+            if (match) {
+              return {
+                type: 'superscript',
+                raw: match[0],
+                text: match[1].trim()
+              };
+            }
+            return undefined;
+          },
+          renderer(token) {
+            return `<sup>${token.text}</sup>`;
+          }
+        },
+        {
+          name: 'subscript',
+          level: 'inline',
+          start(src) { return src.match(/~/)?.index; },
+          tokenizer(src) {
+            const rule = /^~([^~]+)~/;
+            const match = rule.exec(src);
+            if (match) {
+              return {
+                type: 'subscript',
+                raw: match[0],
+                text: match[1].trim()
+              };
+            }
+            return undefined;
+          },
+          renderer(token) {
+            return `<sub>${token.text}</sub>`;
+          }
+        }
+      ]
+    });
+
+    // DOM Elements
+    const fileInput = document.getElementById('fileInput');
+    const markdownContent = document.getElementById('markdownContent');
+    const tocList = document.getElementById('tocList');
+    const toggleTheme = document.getElementById('toggleTheme');
+    const zoomIn = document.getElementById('zoomIn');
+    const zoomOut = document.getElementById('zoomOut');
+    const resetZoom = document.getElementById('resetZoom');
+    const startHighlight = document.getElementById('startHighlight');
+    const clearHighlights = document.getElementById('clearHighlights');
+    const printContent = document.getElementById('printContent');
+    const sidebar = document.querySelector('.sidebar');
+
+    // State variables
+    let currentZoomLevel = 100;
+    let isHighlightMode = false;
+    let currentMarkdown = '';
+    let fileName = '';
+
+    // Function to load markdown from file
+    fileInput.addEventListener('change', (event) => {
+      const file = event.target.files[0];
+      if (!file) return;
+      
+      fileName = file.name;
+      
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        currentMarkdown = e.target.result;
+        renderMarkdown(currentMarkdown);
+        saveToLocalStorage(fileName, currentMarkdown);
+      };
+      reader.readAsText(file);
+    });
+
+    // Function to render markdown content
+    function renderMarkdown(markdown) {
+      markdownContent.innerHTML = marked.parse(markdown);
+      generateTableOfContents();
+      setupClipboardForCodeBlocks();
+      document.title = fileName ? `${fileName} - ReaderBlocks` : 'ReaderBlocks';
+    }
+
+    // Function to generate table of contents
+    function generateTableOfContents() {
+      tocList.innerHTML = '';
+      const headings = markdownContent.querySelectorAll('h1, h2, h3, h4, h5, h6');
+      
+      headings.forEach((heading, index) => {
+        // Add ID to heading if it doesn't have one
+        if (!heading.id) {
+          heading.id = `heading-${index}`;
+        }
+        
+        const level = parseInt(heading.tagName.substring(1));
+        const tocItem = document.createElement('li');
+        tocItem.textContent = heading.textContent;
+        tocItem.className = `toc-item toc-level-${level}`;
+        tocItem.dataset.target = heading.id;
+        
+        tocItem.addEventListener('click', () => {
+          document.getElementById(heading.id).scrollIntoView({ behavior: 'smooth' });
+        });
+        
+        tocList.appendChild(tocItem);
+      });
+    }
+
+    // Setup clipboard functionality for code blocks
+    function setupClipboardForCodeBlocks() {
+      const codeBlocks = document.querySelectorAll('pre code');
+      
+      codeBlocks.forEach((codeBlock) => {
+        const pre = codeBlock.parentNode;
+        
+        // Add copy button container if it doesn't exist
+        if (!pre.querySelector('.copy-button')) {
+          const copyButton = document.createElement('button');
+          copyButton.className = 'copy-button';
+          copyButton.textContent = 'Copy';
+          copyButton.style.position = 'absolute';
+          copyButton.style.top = '5px';
+          copyButton.style.right = '5px';
+          copyButton.style.padding = '4px 8px';
+          copyButton.style.fontSize = '12px';
+          copyButton.style.border = 'none';
+          copyButton.style.borderRadius = '4px';
+          copyButton.style.background = 'rgba(0,0,0,0.1)';
+          copyButton.style.cursor = 'pointer';
+          
+          // Update pre style for relative positioning
+          pre.style.position = 'relative';
+          
+          copyButton.addEventListener('click', () => {
+            const textToCopy = codeBlock.textContent;
+            navigator.clipboard.writeText(textToCopy).then(() => {
+              const originalText = copyButton.textContent;
+              copyButton.textContent = 'Copied!';
+              setTimeout(() => {
+                copyButton.textContent = originalText;
+              }, 2000);
+            });
+          });
+          
+          pre.appendChild(copyButton);
+        }
+      });
+    }
+
+    // Toggle dark/light mode
+    toggleTheme.addEventListener('click', () => {
+      document.body.classList.toggle('dark-mode');
+      const isDarkMode = document.body.classList.contains('dark-mode');
+      localStorage.setItem('darkMode', isDarkMode);
+    });
+
+    // Initialize theme from localStorage
+    if (localStorage.getItem('darkMode') === 'true') {
+      document.body.classList.add('dark-mode');
+    }
+
+    // Zoom controls
+    zoomIn.addEventListener('click', () => {
+      currentZoomLevel += 10;
+      updateZoom();
+    });
+
+    zoomOut.addEventListener('click', () => {
+      currentZoomLevel = Math.max(50, currentZoomLevel - 10);
+      updateZoom();
+    });
+
+    resetZoom.addEventListener('click', () => {
+      currentZoomLevel = 100;
+      updateZoom();
+    });
+
+    function updateZoom() {
+      markdownContent.style.fontSize = `${currentZoomLevel}%`;
+      localStorage.setItem('zoomLevel', currentZoomLevel);
+    }
+
+    // Initialize zoom from localStorage
+    if (localStorage.getItem('zoomLevel')) {
+      currentZoomLevel = parseInt(localStorage.getItem('zoomLevel'));
+      updateZoom();
+    }
+
+    // Highlight functionality
+    startHighlight.addEventListener('click', () => {
+      isHighlightMode = !isHighlightMode;
+      startHighlight.style.backgroundColor = isHighlightMode ? 'var(--highlight-color)' : '';
+    });
+
+    markdownContent.addEventListener('mouseup', () => {
+      if (!isHighlightMode) return;
+      
+      const selection = window.getSelection();
+      if (selection.toString().length > 0) {
+        const range = selection.getRangeAt(0);
+        const span = document.createElement('mark');
+        
+        try {
+          range.surroundContents(span);
+        } catch (e) {
+          console.log('Highlighting failed', e);
+        }
+        
+        selection.removeAllRanges();
+      }
+    });
+
+    clearHighlights.addEventListener('click', () => {
+      const highlights = markdownContent.querySelectorAll('mark.highlighted');
+      highlights.forEach(highlight => {
+        const parent = highlight.parentNode;
+        while (highlight.firstChild) {
+          parent.insertBefore(highlight.firstChild, highlight);
+        }
+        parent.removeChild(highlight);
+      });
+    });
+
+    // Print functionality
+    printContent.addEventListener('click', () => {
+      window.print();
+    });
+
+    // Save and load markdown from localStorage
+    function saveToLocalStorage(name, content) {
+      localStorage.setItem('markdown_file_name', name);
+      localStorage.setItem('markdown_content', content);
+    }
+
+    function loadFromLocalStorage() {
+      const savedName = localStorage.getItem('markdown_file_name');
+      const savedContent = localStorage.getItem('markdown_content');
+      
+      if (savedName && savedContent) {
+        fileName = savedName;
+        currentMarkdown = savedContent;
+        renderMarkdown(currentMarkdown);
+      }
+    }
+
+    // Initial load from localStorage or default content
+    window.addEventListener('DOMContentLoaded', () => {
+      loadFromLocalStorage();
+      
+      // If no saved content, show a default welcome message
+      if (!currentMarkdown) {
+        currentMarkdown = `# Welcome to ReaderBlocks\n\nThis web-based viewer allows you to view and read markdown files. Use the controls in the sidebar to:\n\n- Import a markdown file\n- Zoom in and out\n- Toggle dark/light mode\n- Highlight important text\n\nThe table of contents on the left will automatically generate based on headings in your document.\n\n## Features\n\nThis viewer supports extended markdown features like:\n\n- **Bold** and *italic* text\n- ==Highlighted text==\n- H~2~O (subscript)\n- X^2^ (superscript)\n- Code blocks with syntax highlighting\n- Tables and lists\n- Task lists (- [x] completed task)\n- And more!`;
+        renderMarkdown(currentMarkdown);
+      }
+    });
+
+    // Example markdown content (from your document)
+    const exampleMarkdown = document.querySelector('document_content')?.textContent;
+    if (exampleMarkdown) {
+      currentMarkdown = exampleMarkdown;
+      fileName = "markdown_tutorial.md";
+      renderMarkdown(currentMarkdown);
+      saveToLocalStorage(fileName, currentMarkdown);
+    }
+  </script>
+</body>
+</html>

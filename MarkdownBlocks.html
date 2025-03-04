@@ -1,0 +1,1194 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MarkdownBlocks</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/github.min.css"
+    id="code-theme">
+  <style>
+    :root {
+      --primary-color: #3b82f6;
+      --primary-hover: #2563eb;
+      --secondary-color: #f3f4f6;
+      --text-color: #1f2937;
+      --background-color: #f9fafb;
+      --border-color: #e5e7eb;
+      --error-color: #ef4444;
+      --success-color: #10b981;
+      --code-bg: #f0f0f5;
+      --blockquote-color: #6b7280;
+      --component-bg: white;
+      --highlight-color: #fff176;
+    }
+
+    [data-theme="dark"] {
+      --primary-color: #4f46e5;
+      --primary-hover: #6366f1;
+      --secondary-color: #374151;
+      --text-color: #e5e7eb;
+      --background-color: #111827;
+      --border-color: #374151;
+      --error-color: #f87171;
+      --success-color: #34d399;
+      --code-bg: #1e293b;
+      --blockquote-color: #9ca3af;
+      --component-bg: #1f2937;
+      --highlight-color: #fbbf24;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+      line-height: 1.6;
+      color: var(--text-color);
+      background-color: var(--background-color);
+      transition: background-color 0.3s, color 0.3s;
+    }
+
+    .container {
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 1rem;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+    }
+
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 1rem 0;
+      border-bottom: 1px solid var(--border-color);
+      margin-bottom: 1rem;
+    }
+
+    h1 {
+      font-size: 1.5rem;
+      font-weight: 600;
+    }
+
+    .header-buttons {
+      display: flex;
+      gap: 0.5rem;
+    }
+
+    .toolbar {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+      padding: 0.5rem 0;
+      margin-bottom: 1rem;
+      background-color: var(--component-bg);
+      border: 1px solid var(--border-color);
+      border-radius: 0.375rem;
+      padding: 0.5rem;
+      transition: background-color 0.3s, border-color 0.3s;
+    }
+
+    .toolbar-group {
+      display: flex;
+      gap: 0.25rem;
+      border-right: 1px solid var(--border-color);
+      padding-right: 0.5rem;
+      margin-right: 0.5rem;
+    }
+
+    .toolbar-group:last-child {
+      border-right: none;
+      padding-right: 0;
+      margin-right: 0;
+    }
+
+    .btn {
+      display: inline-flex;
+      justify-content: center;
+      align-items: center;
+      gap: 0.25rem;
+      background-color: var(--secondary-color);
+      color: var(--text-color);
+      border: none;
+      border-radius: 0.25rem;
+      padding: 0.5rem;
+      font-size: 0.875rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: background-color 0.2s, color 0.2s;
+    }
+
+    .btn:hover {
+      background-color: var(--primary-hover);
+      color: white;
+    }
+
+    .btn-icon {
+      width: 1rem;
+      height: 1rem;
+    }
+
+    .editor-container {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1rem;
+      flex: 1;
+      min-height: 0;
+    }
+
+    .editor-box,
+    .preview-box {
+      border: 1px solid var(--border-color);
+      border-radius: 0.375rem;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      transition: border-color 0.3s;
+    }
+
+    .editor-header,
+    .preview-header {
+      padding: 0.5rem 1rem;
+      background-color: var(--component-bg);
+      border-bottom: 1px solid var(--border-color);
+      font-weight: 600;
+      font-size: 0.875rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      transition: background-color 0.3s, border-color 0.3s;
+    }
+
+    #editor {
+      flex: 1;
+      padding: 1rem;
+      border: none;
+      resize: none;
+      background-color: var(--component-bg);
+      color: var(--text-color);
+      font-family: 'Courier New', Courier, monospace;
+      font-size: 0.875rem;
+      line-height: 1.5;
+      width: 100%;
+      height: 100%;
+      outline: none;
+      transition: background-color 0.3s, color 0.3s;
+    }
+
+    #preview {
+      flex: 1;
+      padding: 1rem;
+      overflow-y: auto;
+      background-color: var(--component-bg);
+      transition: background-color 0.3s;
+    }
+
+    #editor,
+    #preview {
+      flex: 1;
+      overflow-y: auto;
+      padding: 1rem;
+    }
+
+    #preview img {
+      max-width: 100%;
+    }
+
+    #preview h1,
+    #preview h2,
+    #preview h3,
+    #preview h4,
+    #preview h5,
+    #preview h6 {
+      margin-top: 1.5rem;
+      margin-bottom: 1rem;
+      color: var(--text-color);
+    }
+
+    #preview p {
+      margin-bottom: 1rem;
+    }
+
+    #preview blockquote {
+      border-left: 4px solid var(--border-color);
+      padding-left: 1rem;
+      margin-left: 0;
+      color: var(--blockquote-color);
+    }
+
+    #preview pre {
+      background-color: var(--code-bg);
+      padding: 1rem;
+      border-radius: 0.375rem;
+      overflow-x: auto;
+      margin-bottom: 1rem;
+    }
+
+    #preview code {
+      background-color: var(--code-bg);
+      padding: 2px 5px;
+      border-radius: 5px;
+      font-family: monospace;
+      font-size: 1em;
+    }
+
+    #preview table {
+      border-collapse: collapse;
+      width: 100%;
+      margin-bottom: 1rem;
+    }
+
+    #preview th,
+    #preview td {
+      border: 1px solid var(--border-color);
+      padding: 0.5rem;
+    }
+
+    #preview th {
+      background-color: var(--secondary-color);
+    }
+
+    #preview ol {
+      padding-left: 2rem;
+      margin-left: 0.5rem;
+      margin-bottom: 1rem;
+    }
+
+    #preview ol li {
+      padding-left: 0.5rem;
+      margin-bottom: 0.5rem;
+    }
+
+    #preview ol ol {
+      margin-top: 0.5rem;
+      margin-bottom: 0.5rem;
+    }
+
+    #preview ul {
+      padding-left: 2rem;
+      margin-left: 0.5rem;
+      margin-bottom: 1rem;
+    }
+
+    #preview ul li {
+      padding-left: 0.5rem;
+      margin-bottom: 0.5rem;
+    }
+
+    #preview ul ul {
+      margin-top: 0.5rem;
+      margin-bottom: 0.5rem;
+    }
+
+    #preview mark {
+      background-color: var(--highlight-color);
+      padding: 0.1em 0.2em;
+      border-radius: 0.2em;
+    }
+
+    .status {
+      display: flex;
+      gap: 1rem;
+    }
+
+    #message {
+      position: fixed;
+      bottom: 1rem;
+      right: 1rem;
+      padding: 0.5rem 1rem;
+      border-radius: 0.375rem;
+      font-size: 0.875rem;
+      font-weight: 500;
+      opacity: 0;
+      transition: opacity 0.3s;
+      z-index: 1000;
+    }
+
+    .message-success {
+      background-color: var(--success-color);
+      color: white;
+    }
+
+    .message-error {
+      background-color: var(--error-color);
+      color: white;
+    }
+
+    .show-message {
+      opacity: 1 !important;
+    }
+
+    .modal {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.5);
+      z-index: 1000;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .modal-content {
+      background-color: var(--component-bg);
+      padding: 1.5rem;
+      border-radius: 0.5rem;
+      max-width: 500px;
+      width: 100%;
+      color: var(--text-color);
+      transition: background-color 0.3s, color 0.3s;
+    }
+
+    .modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1rem;
+    }
+
+    .modal-title {
+      font-size: 1.25rem;
+      font-weight: 600;
+    }
+
+    .modal-close {
+      background: none;
+      border: none;
+      font-size: 1.5rem;
+      cursor: pointer;
+      color: var(--text-color);
+    }
+
+    .modal-body {
+      margin-bottom: 1.5rem;
+    }
+
+    .form-group {
+      margin-bottom: 1rem;
+    }
+
+    .form-label {
+      display: block;
+      margin-bottom: 0.5rem;
+      font-weight: 500;
+    }
+
+    .form-input {
+      width: 100%;
+      padding: 0.5rem;
+      border: 1px solid var(--border-color);
+      border-radius: 0.375rem;
+      font-size: 0.875rem;
+      background-color: var(--component-bg);
+      color: var(--text-color);
+    }
+
+    .modal-footer {
+      display: flex;
+      justify-content: flex-end;
+      gap: 0.5rem;
+    }
+
+    .btn-primary {
+      background-color: var(--primary-color);
+      color: white;
+    }
+
+    .btn-primary:hover {
+      background-color: var(--primary-hover);
+    }
+
+    /* Theme toggle styles */
+    .theme-toggle {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0.5rem;
+      border-radius: 0.25rem;
+      background-color: var(--secondary-color);
+      cursor: pointer;
+      transition: background-color 0.2s;
+    }
+
+    .theme-toggle:hover {
+      background-color: var(--primary-hover);
+      color: white;
+    }
+
+    /* Export document styles */
+    #exported-document {
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 2rem;
+      font-family: 'Georgia', serif;
+      line-height: 1.6;
+    }
+
+    .exported-header {
+      text-align: center;
+      margin-bottom: 2rem;
+    }
+
+    .exported-title {
+      font-size: 2.5rem;
+      margin-bottom: 0.5rem;
+      color: #333;
+    }
+
+    .exported-metadata {
+      font-size: 0.9rem;
+      color: #666;
+    }
+
+    .exported-content {
+      font-size: 1.1rem;
+    }
+
+    .exported-content h1 {
+      font-size: 2rem;
+      border-bottom: 1px solid #eee;
+      padding-bottom: 0.5rem;
+      margin: 2rem 0 1rem;
+    }
+
+    .exported-content h2 {
+      font-size: 1.5rem;
+      margin: 1.8rem 0 1rem;
+    }
+
+    .exported-content h3 {
+      font-size: 1.25rem;
+      margin: 1.5rem 0 1rem;
+    }
+
+    .exported-content p {
+      margin-bottom: 1.2rem;
+    }
+
+    #exportModal {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.5);
+      z-index: 1001;
+      justify-content: center;
+      align-items: center;
+    }
+
+    #exportModal .modal-content {
+      max-width: 400px;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="container">
+    <header>
+      <h1>MarkdownBlocks</h1>
+      <div class="header-buttons">
+        <button id="btnImport" class="btn">Import</button>
+        <button id="btnExport" class="btn">Export</button>
+      </div>
+    </header>
+
+    <div class="toolbar">
+      <div class="toolbar-group">
+        <button class="btn" data-action="heading-1" title="Heading 1">H1</button>
+        <button class="btn" data-action="heading-2" title="Heading 2">H2</button>
+        <button class="btn" data-action="heading-3" title="Heading 3">H3</button>
+      </div>
+      <div class="toolbar-group">
+        <button class="btn" data-action="bold" title="Bold">
+          <svg class="btn-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
+            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M6 4h8a4 4 0 0 1 4 4 4 4 0 0 1-4 4H6z"></path>
+            <path d="M6 12h9a4 4 0 0 1 4 4 4 4 0 0 1-4 4H6z"></path>
+          </svg>
+        </button>
+        <button class="btn" data-action="italic" title="Italic">
+          <svg class="btn-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
+            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="19" y1="4" x2="10" y2="4"></line>
+            <line x1="14" y1="20" x2="5" y2="20"></line>
+            <line x1="15" y1="4" x2="9" y2="20"></line>
+          </svg>
+        </button>
+        <button class="btn" data-action="strikethrough" title="Strikethrough">
+          <svg class="btn-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
+            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path
+              d="M17.3 4.9c-2.3-.6-4.4-.6-6.6 0-2.2.6-3.6 1.9-3.6 3.5s1.4 2.9 3.6 3.5M9.3 18.7c1.2.3 2.7.3 4.4 0 2.2-.6 3.6-1.9 3.6-3.5">
+            </path>
+            <line x1="4" y1="12" x2="20" y2="12"></line>
+          </svg>
+        </button>
+        <button class="btn" data-action="highlight" title="Highlight">
+          <svg class="btn-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
+            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 2L2 12l4.5 4.5L18 5"></path>
+            <path d="M18 5l4 4"></path>
+            <path d="M2 12l4 4"></path>
+          </svg>
+        </button>
+      </div>
+      <div class="toolbar-group">
+        <button class="btn" data-action="quote" title="Quote">
+          <svg class="btn-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
+            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path
+              d="M3 21c3 0 7-1 7-8V5c0-1.25-.756-2.017-2-2H4c-1.25 0-2 .75-2 1.972V11c0 1.25.75 2 2 2 1 0 1 0 1 1v1c0 1-1 2-2 2s-1 .008-1 1.031V20c0 1 0 1 1 1z">
+            </path>
+            <path
+              d="M15 21c3 0 7-1 7-8V5c0-1.25-.757-2.017-2-2h-4c-1.25 0-2 .75-2 1.972V11c0 1.25.75 2 2 2h.75c0 2.25.25 4-2.75 4v3c0 1 0 1 1 1z">
+            </path>
+          </svg>
+        </button>
+        <button class="btn" data-action="code" title="Code">
+          <svg class="btn-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
+            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="16 18 22 12 16 6"></polyline>
+            <polyline points="8 6 2 12 8 18"></polyline>
+          </svg>
+        </button>
+        <button class="btn" data-action="codeblock" title="Code Block">
+          <svg class="btn-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
+            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="16 18 22 12 16 6"></polyline>
+            <polyline points="8 6 2 12 8 18"></polyline>
+            <rect x="2" y="6" width="20" height="12" rx="2" ry="2"></rect>
+          </svg>
+        </button>
+      </div>
+      <div class="toolbar-group">
+        <button class="btn" data-action="unordered-list" title="Bulleted List">
+          <svg class="btn-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
+            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="8" y1="6" x2="21" y2="6"></line>
+            <line x1="8" y1="12" x2="21" y2="12"></line>
+            <line x1="8" y1="18" x2="21" y2="18"></line>
+            <line x1="3" y1="6" x2="3.01" y2="6"></line>
+            <line x1="3" y1="12" x2="3.01" y2="12"></line>
+            <line x1="3" y1="18" x2="3.01" y2="18"></line>
+          </svg>
+        </button>
+        <button class="btn" data-action="ordered-list" title="Numbered List">
+          <svg class="btn-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
+            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="10" y1="6" x2="21" y2="6"></line>
+            <line x1="10" y1="12" x2="21" y2="12"></line>
+            <line x1="10" y1="18" x2="21" y2="18"></line>
+            <path d="M4 6h1v4"></path>
+            <path d="M4 10h2"></path>
+            <path d="M6 18H4c0-1 2-2 2-3s-1-1.5-2-1"></path>
+          </svg>
+        </button>
+        <button class="btn" data-action="task-list" title="Task List">
+          <svg class="btn-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
+            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="3" y="5" width="6" height="6" rx="1"></rect>
+            <path d="m3 17 2 2 4-4"></path>
+            <line x1="12" y1="8" x2="20" y2="8"></line>
+            <line x1="12" y1="16" x2="20" y2="16"></line>
+          </svg>
+        </button>
+      </div>
+      <div class="toolbar-group">
+        <button class="btn" data-action="link" title="Link">
+          <svg class="btn-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
+            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path>
+            <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path>
+          </svg>
+        </button>
+        <button class="btn" data-action="image" title="Image">
+          <svg class="btn-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
+            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+            <circle cx="8.5" cy="8.5" r="1.5"></circle>
+            <polyline points="21 15 16 10 5 21"></polyline>
+          </svg>
+        </button>
+        <button class="btn" data-action="table" title="Table">
+          <svg class="btn-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
+            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+            <line x1="3" y1="9" x2="21" y2="9"></line>
+            <line x1="3" y1="15" x2="21" y2="15"></line>
+            <line x1="9" y1="3" x2="9" y2="21"></line>
+            <line x1="15" y1="3" x2="15" y2="21"></line>
+          </svg>
+        </button>
+      </div>
+      <div class="toolbar-group">
+        <button class="btn" data-action="horizontal-rule" title="Horizontal Rule">
+          <svg class="btn-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
+            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="5" y1="12" x2="19" y2="12"></line>
+          </svg>
+        </button>
+      </div>
+      <div class="toolbar-group">
+        <button id="theme-toggle" class="btn" title="Toggle Dark/Light Mode">
+          <svg class="btn-icon light-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
+            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="5"></circle>
+            <line x1="12" y1="1" x2="12" y2="3"></line>
+            <line x1="12" y1="21" x2="12" y2="23"></line>
+            <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+            <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+            <line x1="1" y1="12" x2="3" y2="12"></line>
+            <line x1="21" y1="12" x2="23" y2="12"></line>
+            <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+            <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+          </svg>
+          <svg class="btn-icon dark-icon" style="display: none;" xmlns="http://www.w3.org/2000/svg"
+            viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+            stroke-linejoin="round">
+            <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+          </svg>
+        </button>
+      </div>
+    </div>
+
+    <div class="editor-container">
+      <div class="editor-box">
+        <div class="editor-header">
+          <span>Editor</span>
+          <span id="save-status">Saved</span>
+        </div>
+        <textarea id="editor" spellcheck="true" placeholder="Start writing here..."></textarea>
+      </div>
+      <div class="preview-box">
+        <div class="preview-header">
+          <span>Preview</span>
+        </div>
+        <div id="preview"></div>
+      </div>
+    </div>
+  </div>
+
+  <div id="linkModal" class="modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3 class="modal-title">Insert Link</h3>
+        <button class="modal-close" data-close="linkModal">×</button>
+      </div>
+      <div class="modal-body">
+        <div class="form-group">
+          <label for="linkText" class="form-label">Link Text</label>
+          <input type="text" id="linkText" class="form-input" placeholder="Link text">
+        </div>
+        <div class="form-group">
+          <label for="linkUrl" class="form-label">URL</label>
+          <input type="text" id="linkUrl" class="form-input" placeholder="https://example.com">
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn" data-close="linkModal">Cancel</button>
+        <button class="btn btn-primary" id="insertLink">Insert</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="imageModal" class="modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3 class="modal-title">Insert Image</h3>
+        <button class="modal-close" data-close="imageModal">×</button>
+      </div>
+      <div class="modal-body">
+        <div class="form-group">
+          <label for="imageAlt" class="form-label">Alt Text</label>
+          <input type="text" id="imageAlt" class="form-input" placeholder="Image description">
+        </div>
+        <div class="form-group">
+          <label for="imageUrl" class="form-label">Image URL</label>
+          <input type="text" id="imageUrl" class="form-input" placeholder="https://example.com/image.jpg">
+        </div>      </div>
+        <div class="modal-footer">
+          <button class="btn" data-close="imageModal">Cancel</button>
+          <button class="btn btn-primary" id="insertImage">Insert</button>
+        </div>
+      </div>
+    </div>
+  
+    <div id="tableModal" class="modal">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h3 class="modal-title">Insert Table</h3>
+          <button class="modal-close" data-close="tableModal">×</button>
+        </div>
+        <div class="modal-body">
+          <div class="form-group">
+            <label for="tableRows" class="form-label">Rows</label>
+            <input type="number" id="tableRows" class="form-input" placeholder="Number of rows" value="3" min="1">
+          </div>
+          <div class="form-group">
+            <label for="tableCols" class="form-label">Columns</label>
+            <input type="number" id="tableCols" class="form-input" placeholder="Number of columns" value="3" min="1">
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button class="btn" data-close="tableModal">Cancel</button>
+          <button class="btn btn-primary" id="insertTable">Insert</button>
+        </div>
+      </div>
+    </div>
+  
+    <div id="exportModal" class="modal">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h3 class="modal-title">Export Document</h3>
+          <button class="modal-close" data-close="exportModal">×</button>
+        </div>
+        <div class="modal-body">
+          <div class="form-group">
+            <label for="exportFormat" class="form-label">File Format</label>
+            <select id="exportFormat" class="form-input">
+              <option value="md">Markdown (.md)</option>
+              <option value="txt">Plain Text (.txt)</option>
+              <option value="html">HTML (.html)</option>
+            </select>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button class="btn" data-close="exportModal">Cancel</button>
+          <button class="btn btn-primary" id="performExport">Export</button>
+        </div>
+      </div>
+    </div>
+  
+    <div id="message" class="message"></div>
+  
+  
+    <template id="exported-document-template">
+      <div id="exported-document">
+        <header class="exported-header">
+          <h1 class="exported-title"></h1>
+          <p class="exported-metadata">Exported on: <span id="export-date"></span></p>
+        </header>
+        <div class="exported-content"></div>
+      </div>
+    </template>
+  
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/showdown/2.1.0/showdown.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/highlight.min.js"></script>
+    <script>
+      const editor = document.getElementById('editor');
+      const preview = document.getElementById('preview');
+      const saveStatus = document.getElementById('save-status');
+      const btnImport = document.getElementById('btnImport');
+      const btnExport = document.getElementById('btnExport');
+      const linkModal = document.getElementById('linkModal');
+      const imageModal = document.getElementById('imageModal');
+      const tableModal = document.getElementById('tableModal');
+      const exportModal = document.getElementById('exportModal');
+      const insertLinkBtn = document.getElementById('insertLink');
+      const insertImageBtn = document.getElementById('insertImage');
+      const insertTableBtn = document.getElementById('insertTable');
+      const performExportBtn = document.getElementById('performExport');
+      const exportFormatSelect = document.getElementById('exportFormat');
+      const themeToggle = document.getElementById('theme-toggle');
+      const lightIcon = document.querySelector('.light-icon');
+      const darkIcon = document.querySelector('.dark-icon');
+      const message = document.getElementById('message');
+      const exportedDocumentTemplate = document.getElementById('exported-document-template').content.cloneNode(true);
+  
+      const localStorageKey = 'markdown-editor-content';
+  
+      const converter = new showdown.Converter({
+        tables: true,
+        strikethrough: true,
+        tasklists: true,
+        simplifiedAutoLink: true,
+        openLinksInNewWindow: true,
+        emoji: true
+      });
+  
+      function updatePreview() {
+        const markdownText = editor.value;
+        const html = converter.makeHtml(markdownText);
+        preview.innerHTML = html;
+        hljs.highlightAll();
+      }
+  
+      function showMessage(text, type = 'success') {
+        message.textContent = text;
+        message.className = `message message-${type} show-message`;
+        setTimeout(() => {
+          message.className = 'message';
+        }, 3000);
+      }
+  
+      function openModal(modalId) {
+        document.getElementById(modalId).style.display = 'flex';
+      }
+  
+      function closeModal(modalId) {
+        document.getElementById(modalId).style.display = 'none';
+      }
+  
+      document.addEventListener('click', function (event) {
+        if (event.target.dataset.close) {
+          closeModal(event.target.dataset.close);
+        }
+      });
+  
+      function insertText(text) {
+        const start = editor.selectionStart;
+        const end = editor.selectionEnd;
+        editor.value = editor.value.substring(0, start) + text + editor.value.substring(end);
+        editor.selectionStart = editor.selectionEnd = start + text.length;
+        editor.focus();
+        updatePreview();
+      }
+  
+      document.querySelector('.toolbar').addEventListener('click', function (event) {
+        if (!event.target.dataset.action) return;
+  
+        const action = event.target.dataset.action;
+  
+        switch (action) {
+          case 'heading-1':
+            insertText('# ');
+            break;
+          case 'heading-2':
+            insertText('## ');
+            break;
+          case 'heading-3':
+            insertText('### ');
+            break;
+          case 'bold':
+            insertText('**strong text**');
+            break;
+          case 'italic':
+            insertText('*italicized text*');
+            break;
+          case 'strikethrough':
+            insertText('~~strikethrough text~~');
+            break;
+          case 'highlight':
+            insertText('<mark>highlighted text</mark>');
+            break;
+          case 'quote':
+            insertText('> ');
+            break;
+          case 'code':
+            insertText('`code`');
+            break;
+          case 'codeblock':
+            insertText('```\ncode block\n```');
+            break;
+          case 'unordered-list':
+            insertText('* List item 1\n* List item 2');
+            break;
+          case 'ordered-list':
+            insertText('1. List item 1\n2. List item 2');
+            break;
+          case 'task-list':
+            insertText('- [ ] Task 1\n- [x] Task 2');
+            break;
+          case 'link':
+            openModal('linkModal');
+            break;
+          case 'image':
+            openModal('imageModal');
+            break;
+          case 'table':
+            openModal('tableModal');
+            break;
+          case 'horizontal-rule':
+            insertText('\n---\n');
+            break;
+        }
+      });
+  
+      insertLinkBtn.addEventListener('click', function () {
+        const linkText = document.getElementById('linkText').value;
+        const linkUrl = document.getElementById('linkUrl').value;
+        insertText(`[${linkText}](${linkUrl})`);
+        closeModal('linkModal');
+      });
+  
+      insertImageBtn.addEventListener('click', function () {
+        const imageAlt = document.getElementById('imageAlt').value;
+        const imageUrl = document.getElementById('imageUrl').value;
+        insertText(`![${imageAlt}](${imageUrl})`);
+        closeModal('imageModal');
+      });
+  
+      insertTableBtn.addEventListener('click', function () {
+        const rows = parseInt(document.getElementById('tableRows').value);
+        const cols = parseInt(document.getElementById('tableCols').value);
+  
+        let table = '|';
+        for (let i = 0; i < cols; i++) {
+          table += ' Column ' + (i + 1) + ' |';
+        }
+        table += '\n|';
+        for (let i = 0; i < cols; i++) {
+          table += ' -------- |';
+        }
+        table += '\n';
+        for (let i = 0; i < rows; i++) {
+          table += '|';
+          for (let j = 0; j < cols; j++) {
+            table += '          |';
+          }
+          table += '\n';
+        }
+  
+        insertText(table);
+        closeModal('tableModal');
+      });
+  
+      function downloadFile(filename, content, mimeType) {
+        const blob = new Blob([content], { type: mimeType });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = filename;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+      }
+  
+      function buildHtmlExport(markdownContent) {
+        const htmlContent = converter.makeHtml(markdownContent);
+        const exportDate = new Date().toLocaleDateString();
+  
+        const exportedDocument = exportedDocumentTemplate.cloneNode(true);
+        exportedDocument.querySelector('.exported-title').textContent = 'My Document'; // You can make this dynamic
+        exportedDocument.querySelector('#export-date').textContent = exportDate;
+        exportedDocument.querySelector('.exported-content').innerHTML = htmlContent;
+  
+        // Include theme CSS
+        const themeCSS = `
+          <style>
+            body {
+              font-family: 'Georgia', serif;
+              line-height: 1.6;
+              color: ${getComputedStyle(document.documentElement).getPropertyValue('--text-color')};
+              background-color: ${getComputedStyle(document.documentElement).getPropertyValue('--background-color')};
+            }
+  
+            h1 {
+              font-size: 2rem;
+              border-bottom: 1px solid #eee;
+              padding-bottom: 0.5rem;
+              margin: 2rem 0 1rem;
+            }
+  
+            h2 {
+              font-size: 1.5rem;
+              margin: 1.8rem 0 1rem;
+            }
+  
+            h3 {
+              font-size: 1.25rem;
+              margin: 1.5rem 0 1rem;
+            }
+  
+            p {
+              margin-bottom: 1.2rem;
+            }
+  
+            blockquote {
+              border-left: 4px solid #ccc;
+              padding-left: 1rem;
+              margin-left: 0;
+              color: #666;
+            }
+  
+            pre {
+              background-color: #f4f4f4;
+              padding: 1rem;
+              border-radius: 0.375rem;
+              overflow-x: auto;
+              margin-bottom: 1rem;
+            }
+  
+            code {
+              background-color: #f4f4f4;
+              padding: 2px 5px;
+              border-radius: 5px;
+              font-family: monospace;
+              font-size: 1em;
+            }
+  
+            table {
+              border-collapse: collapse;
+              width: 100%;
+              margin-bottom: 1rem;
+            }
+  
+            th, td {
+              border: 1px solid #ddd;
+              padding: 0.5rem;
+            }
+  
+            th {
+              background-color: #eee;
+            }
+  
+            ol {
+              padding-left: 2rem;
+              margin-left: 0.5rem;
+              margin-bottom: 1rem;
+            }
+  
+            ul {
+              padding-left: 2rem;
+              margin-left: 0.5rem;
+              margin-bottom: 1rem;
+            }
+  
+            mark {
+              background-color: yellow;
+              padding: 0.1em 0.2em;
+              border-radius: 0.2em;
+            }
+          </style>
+        `;
+  
+        // Wrap the content within the template
+        const completeHtml = `
+          <!DOCTYPE html>
+          <html lang="en">
+          <head>
+            <meta charset="UTF-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            <title>Exported Document</title>
+            ${themeCSS}
+          </head>
+          <body>
+            ${exportedDocument.firstElementChild.outerHTML}
+          </body>
+          </html>
+        `;
+  
+        return completeHtml;
+      }
+  
+      performExportBtn.addEventListener('click', function () {
+        const format = exportFormatSelect.value;
+        const content = editor.value;
+        let filename = 'document';
+        let fileContent = content;
+        let mimeType = 'text/plain';
+  
+        if (format === 'html') {
+          filename += '.html';
+          fileContent = buildHtmlExport(content);
+          mimeType = 'text/html';
+        } else if (format === 'md') {
+          filename += '.md';
+          mimeType = 'text/markdown';
+        } else {
+          filename += '.txt';
+        }
+  
+        downloadFile(filename, fileContent, mimeType);
+        closeModal('exportModal');
+      });
+  
+  
+      btnExport.addEventListener('click', function () {
+        openModal('exportModal');
+      });
+  
+      btnImport.addEventListener('click', function () {
+        const input = document.createElement('input');
+        input.type = 'file';
+        input.accept = '.md,.txt';
+  
+        input.onchange = function (event) {
+          const file = event.target.files[0];
+  
+          if (file) {
+            const reader = new FileReader();
+  
+            reader.onload = function (e) {
+              editor.value = e.target.result;
+              updatePreview();
+              localStorage.setItem(localStorageKey, editor.value);
+              showMessage('Document imported successfully!');
+            };
+  
+            reader.readAsText(file);
+          }
+        };
+  
+        input.click();
+      });
+  
+      themeToggle.addEventListener('click', function () {
+        const currentTheme = document.documentElement.dataset.theme;
+        const newTheme = currentTheme === 'light' ? 'dark' : 'light';
+        document.documentElement.dataset.theme = newTheme;
+  
+        // Toggle icon visibility
+        lightIcon.style.display = newTheme === 'dark' ? 'none' : 'inline';
+        darkIcon.style.display = newTheme === 'light' ? 'none' : 'inline';
+  
+        // Update code theme
+        const codeThemeLink = document.getElementById('code-theme');
+        codeThemeLink.href = newTheme === 'dark'
+          ? 'https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/monokai-sublime.min.css'
+          : 'https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/github.min.css';
+  
+        localStorage.setItem('preferred-theme', newTheme); // Persist theme preference
+      });
+  
+      // Local Storage Persistence
+      function loadContent() {
+        const savedContent = localStorage.getItem(localStorageKey);
+        if (savedContent) {
+          editor.value = savedContent;
+          updatePreview();
+        }
+      }
+  
+      function saveContent() {
+        localStorage.setItem(localStorageKey, editor.value);
+        saveStatus.textContent = 'Saved';
+        setTimeout(() => {
+          saveStatus.textContent = 'Saved';
+        }, 2000);
+      }
+  
+      editor.addEventListener('input', () => {
+        updatePreview();
+        saveStatus.textContent = 'Saving...';
+        setTimeout(saveContent, 1000); // Debounce save to every 1 second
+      });
+  
+      // Load preferred theme from local storage
+      const preferredTheme = localStorage.getItem('preferred-theme') || 'light';
+      document.documentElement.dataset.theme = preferredTheme;
+      lightIcon.style.display = preferredTheme === 'dark' ? 'none' : 'inline';
+      darkIcon.style.display = preferredTheme === 'light' ? 'none' : 'inline';
+  
+      const codeThemeLink = document.getElementById('code-theme');
+      codeThemeLink.href = preferredTheme === 'dark'
+        ? 'https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/monokai-sublime.min.css'
+        : 'https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/github.min.css';
+  
+      loadContent(); // Load content on page load
+  
+    </script>
+  </body>
+  
+  </html>
