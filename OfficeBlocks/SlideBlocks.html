@@ -1,0 +1,1702 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SlideBlocks</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/github.min.css">
+  <style>
+    :root {
+      --primary-color: #3b82f6;
+      --primary-hover: #2563eb;
+      --secondary-color: #f3f4f6;
+      --text-color: #1f2937;
+      --border-color: #e5e7eb;
+      --error-color: #ef4444;
+      --success-color: #10b981;
+      --light-gray: #f9fafb;
+      --medium-gray: #9ca3af;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+      line-height: 1.6;
+      color: var(--text-color);
+      background-color: var(--light-gray);
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .container {
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 0 1rem;
+      width: 100%;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+    }
+
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0.75rem 0;
+      border-bottom: 1px solid var(--border-color);
+    }
+
+    .app-title {
+      font-size: 1.5rem;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .btn {
+      display: inline-flex;
+      justify-content: center;
+      align-items: center;
+      gap: 0.25rem;
+      background-color: var(--secondary-color);
+      color: var(--text-color);
+      border: none;
+      border-radius: 0.25rem;
+      padding: 0.5rem 0.75rem;
+      font-size: 0.875rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: background-color 0.2s, color 0.2s;
+    }
+
+    .btn:hover {
+      background-color: #e5e7eb;
+    }
+
+    .btn-primary {
+      background-color: var(--primary-color);
+      color: white;
+    }
+
+    .btn-primary:hover {
+      background-color: var(--primary-hover);
+    }
+
+    .btn-icon {
+      width: 1rem;
+      height: 1rem;
+    }
+
+    .toolbar-container {
+      background-color: white;
+      border: 1px solid var(--border-color);
+      border-radius: 0.375rem;
+      margin: 0.75rem 0;
+      position: sticky;
+      top: 0;
+      z-index: 10;
+    }
+
+    .toolbar {
+      display: flex;
+      flex-wrap: wrap;
+      padding: 0.5rem;
+      gap: 0.25rem;
+    }
+
+    .toolbar-group {
+      display: flex;
+      gap: 0.25rem;
+      border-right: 1px solid var(--border-color);
+      padding-right: 0.5rem;
+      margin-right: 0.5rem;
+    }
+
+    .toolbar-group:last-child {
+      border-right: none;
+      padding-right: 0;
+      margin-right: 0;
+    }
+
+    .format-toolbar {
+      display: flex;
+      flex-wrap: wrap;
+      padding: 0.5rem;
+      gap: 0.25rem;
+      border-top: 1px solid var(--border-color);
+    }
+
+    .document-container {
+      flex: 1;
+      display: flex;
+      /* Updated to row */
+      flex-direction: row;
+      background-color: white;
+      border: 1px solid var(--border-color);
+      border-radius: 0.375rem;
+      overflow: hidden;
+      min-height: 0;
+    }
+
+    .document {
+      flex: 1;
+      padding: 2rem;
+      overflow-y: auto;
+      outline: none;
+      /* Disable selection to match original SlideBlocks */
+      user-select: none;
+      height: 100%;
+    }
+
+    .page {
+      background-color: white;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+      width: 100%;
+      max-width: 1280px;  /* Standard 16:9 width */
+      margin: 0 auto;
+      min-height: 720px;  /* Standard 16:9 height */
+      padding: 2in;
+      box-sizing: border-box;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+
+    }
+
+    .page h1, .page h2, .page h3, .page h4, .page h5, .page h6 {
+      margin-top: 1rem;
+      margin-bottom: 0.5rem;
+      text-align: center;
+    }
+
+    .page p {
+      margin-bottom: 1rem;
+      text-align: center;
+    }
+
+    .page ul, .page ol {
+      margin-bottom: 1rem;
+      padding-left: 2rem;
+      text-align: left;
+    }
+
+    .page blockquote {
+      border-left: 4px solid var(--border-color);
+      padding-left: 1rem;
+      margin-left: 0;
+      color: #6b7280;
+    }
+
+    .page table {
+      border-collapse: collapse;
+      width: 100%;
+      margin-bottom: 1rem;
+    }
+
+    .page th, .page td {
+      border: 1px solid var(--border-color);
+      padding: 0.5rem;
+    }
+
+    .page th {
+      background-color: #f3f4f6;
+    }
+
+    .page pre {
+      background-color: #f3f4f6;
+      padding: 1rem;
+      border-radius: 0.375rem;
+      overflow-x: auto;
+      margin-bottom: 1rem;
+    }
+
+    .page code {
+      font-family: 'Courier New', Courier, monospace;
+      font-size: 0.875rem;
+    }
+
+    .page img {
+      max-width: 100%;
+      height: auto;
+      display: block;
+      margin: 10px auto; /* Center images */
+    }
+
+    .statusbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0.5rem 1rem;
+      background-color: var(--secondary-color);
+      border-top: 1px solid var(--border-color);
+      font-size: 0.75rem;
+      color: #6b7280;
+    }
+
+    .document-stats {
+      display: flex;
+      gap: 1rem;
+    }
+
+    .footer {
+      text-align: center;
+      padding: 1rem;
+      color: #6b7280;
+      font-size: 0.875rem;
+      border-top: 1px solid var(--border-color);
+    }
+
+    .dropdown {
+      position: relative;
+      display: inline-block;
+    }
+
+    .dropdown-content {
+      display: none;
+      position: absolute;
+      background-color: white;
+      min-width: 160px;
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+      z-index: 100;
+      border-radius: 0.25rem;
+      padding: 0.5rem 0;
+    }
+
+    .dropdown:hover .dropdown-content,
+    .dropdown:focus-within .dropdown-content {
+      display: block;
+    }
+
+    .dropdown-item {
+      display: block;
+      padding: 0.5rem 1rem;
+      text-decoration: none;
+      color: var(--text-color);
+      cursor: pointer;
+    }
+
+    .dropdown-item:hover {
+      background-color: var(--secondary-color);
+    }
+
+    .dropdown-divider {
+      height: 1px;
+      background-color: var(--border-color);
+      margin: 0.5rem 0;
+    }
+
+    /* Style control */
+    .format-select {
+      padding: 0.25rem 0.5rem;
+      border-radius: 0.25rem;
+      border: 1px solid var(--border-color);
+      font-size: 0.875rem;
+      background-color: white;
+    }
+
+    .color-picker {
+      padding: 0;
+      border: none;
+      width: 1.5rem;
+      height: 1.5rem;
+      background: none;
+      cursor: pointer;
+    }
+
+    /* Modal styles */
+    .modal {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.5);
+      z-index: 1000;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .modal-content {
+      background-color: white;
+      padding: 1.5rem;
+      border-radius: 0.5rem;
+      max-width: 500px;
+      width: 100%;
+    }
+
+    .modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1rem;
+    }
+
+    .modal-title {
+      font-size: 1.25rem;
+      font-weight: 600;
+    }
+
+    .modal-close {
+      background: none;
+      border: none;
+      font-size: 1.5rem;
+      cursor: pointer;
+      color: #6b7280;
+    }
+
+    .modal-body {
+      margin-bottom: 1.5rem;
+    }
+
+    .form-group {
+      margin-bottom: 1rem;
+    }
+
+    .form-label {
+      display: block;
+      margin-bottom: 0.5rem;
+      font-weight: 500;
+    }
+
+    .form-input {
+      width: 100%;
+      padding: 0.5rem;
+      border: 1px solid var(--border-color);
+      border-radius: 0.375rem;
+      font-size: 0.875rem;
+    }
+
+    .modal-footer {
+      display: flex;
+      justify-content: flex-end;
+      gap: 0.5rem;
+    }
+
+    /* Toast notification */
+    #message {
+      position: fixed;
+      bottom: 1rem;
+      right: 1rem;
+      padding: 0.5rem 1rem;
+      border-radius: 0.375rem;
+      font-size: 0.875rem;
+      font-weight: 500;
+      opacity: 0;
+      transition: opacity 0.3s;
+    }
+
+    .message-success {
+      background-color: var(--success-color);
+      color: white;
+    }
+
+    .message-error {
+      background-color: var(--error-color);
+      color: white;
+    }
+
+    .show-message {
+      opacity: 1 !important;
+    }
+
+    .activeBtn {
+      background-color: #d1d5db;
+    }
+
+     /* New styles for SlideBlocks */
+    #slide-list {
+      display: flex;
+      /* Updated to column */
+      flex-direction: column;
+      overflow-y: auto; /* Changed from overflow-x */
+      padding: 0.5rem;
+      gap: 0.25rem;
+      width: 150px; /* Fixed width for the slide list */
+      flex-shrink: 0;
+    }
+
+    /*Slide number*/
+    .slide-header {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        padding: 0.5rem;
+        background-color: var(--secondary-color);
+        border-bottom: 1px solid var(--border-color);
+        font-size: 0.75rem;
+        color: #6b7280;
+        width: 150px; /* Fixed width for the slide list */
+        flex-shrink: 0;
+    }
+
+    .slide-thumbnail {
+      width: 100%; /* Full width within the slide list */
+      height: 80px;
+      border: 1px solid var(--border-color);
+      border-radius: 0.25rem;
+      background-color: var(--light-gray);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-size: 0.75rem;
+      color: var(--medium-gray);
+      cursor: pointer;
+      flex-shrink: 0; /* Prevent thumbnails from shrinking */
+    }
+
+    .slide-thumbnail.active {
+      border-color: var(--primary-color);
+    }
+
+    /* Presentation mode styles */
+    .presentation-mode {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100vw;
+        height: 100vh;
+        background-color: rgba(0,0,0,0.9);
+        z-index: 1000;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .presentation-slide {
+        width: 80vw;
+        height: 80vh;
+        background-color: white;
+        padding: 40px;
+        font-size: 1.5em;
+        overflow: hidden;
+    }
+
+    .presentation-controls {
+        position: fixed;
+        bottom: 20px;
+        left: 50%;
+        transform: translateX(-50%);
+        display: flex;
+        gap: 10px;
+        z-index: 1001;
+    }
+
+    /* Modal for insert image */
+    .modal#imageModal .modal-content {
+        max-width: 600px;
+    }
+
+    .modal#imageModal .form-group {
+        margin-bottom: 1.5rem;
+    }
+
+    .modal#imageModal .form-label {
+        font-weight: 600;
+        margin-bottom: 0.5rem;
+    }
+
+    .modal#imageModal .form-input {
+        padding: 0.75rem;
+        font-size: 1rem;
+    }
+
+    .modal#imageModal .modal-footer {
+        justify-content: flex-end;
+    }
+
+    /* Adjustments for color picker */
+    .color-picker {
+      display: none;
+      position: absolute;
+      background-color: white;
+      border: 1px solid var(--border-color);
+      border-radius: 0.375rem;
+      padding: 0.5rem;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+      z-index: 1000;
+    }
+
+    .color-swatch {
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      cursor: pointer;
+      margin: 0.25rem;
+      border: 1px solid transparent;
+    }
+
+    .color-swatch:hover {
+      border-color: var(--border-color);
+    }
+
+    /* Media query for responsiveness */
+    @media (max-width: 768px) {
+        .document-container {
+            flex-direction: column; /* Stack vertically on smaller screens */
+        }
+
+        #slide-list {
+            width: 100%; /* Take full width on small screens */
+            flex-direction: row;
+            overflow-x: auto;
+            overflow-y: hidden;
+            white-space: nowrap;
+            height: auto;
+        }
+
+        .slide-thumbnail {
+            width: 120px;
+        }
+
+        .document {
+            padding: 1rem;
+        }
+
+        .page {
+            padding: 1in;
+        }
+
+        .toolbar {
+            flex-direction: column;
+        }
+
+        .toolbar-group {
+            border-right: none;
+            padding-right: 0;
+            margin-right: 0;
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 0.5rem;
+            margin-bottom: 0.5rem;
+        }
+    }
+
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1 class="app-title">
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="2" y="2" width="20" height="20" rx="2" ry="2"></rect>
+          <line x1="7" y1="2" x2="7" y2="22"></line>
+          <line x1="17" y1="2" x2="17" y2="22"></line>
+          <line x1="2" y1="12" x2="22" y2="12"></line>
+        </svg>
+        SlideBlocks
+      </h1>
+    </header>
+
+    <div class="toolbar-container">
+      <div class="toolbar">
+        <div class="toolbar-group">
+          <button class="btn" id="btnNewSlide" title="New Slide">
+            <svg class="btn-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+              <line x1="12" y1="8" x2="12" y2="16"></line>
+              <line x1="8" y1="12" x2="16" y2="12"></line>
+            </svg>
+          </button>
+          <button class="btn" id="btnDeleteSlide" title="Delete Slide">
+              <svg class="btn-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <polyline points="3 6 5 6 21 6"></polyline>
+                  <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                  <line x1="10" y1="11" x2="10" y2="17"></line>
+                  <line x1="14" y1="11" x2="14" y2="17"></line>
+              </svg>
+          </button>
+          <button class="btn" id="btnDuplicateSlide" title="Duplicate Slide">
+            <svg class="btn-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+            </svg>
+          </button>
+        </div>
+        <div class="toolbar-group">
+            <button class="btn" id="btnMoveSlideLeft" title="Move Slide Left">
+                <svg class="btn-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <polyline points="15 18 9 12 15 6"></polyline>
+                </svg>
+            </button>
+            <button class="btn" id="btnMoveSlideRight" title="Move Slide Right">
+                <svg class="btn-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <polyline points="9 18 15 12 9 6"></polyline>
+                </svg>
+            </button>
+        </div>
+        <div class="toolbar-group">
+          <button class="btn" id="btnSaveShow" title="Save Presentation">
+            <svg class="btn-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path>
+              <polyline points="17 21 17 13 7 13 7 21"></polyline>
+              <polyline points="7 3 7 8 15 8"></polyline>
+            </svg>
+          </button>
+          <button class="btn" id="btnOpenShow" title="Open Presentation">
+            <svg class="btn-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M5 3h14a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2z"></path>
+              <polyline points="8 9 12 5 16 9"></polyline>
+              <line x1="12" y1="5" x2="12" y2="15"></line>
+            </svg>
+          </button>
+        </div>
+        <div class="toolbar-group">
+          <button class="btn" id="btnUndo" title="Undo">
+            <svg class="btn-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M3 7v6h6"></path>
+              <path d="M21 17a9 9 0 0 0-9-9 9 9 0 0 0-6 2.3L3 13"></path>
+            </svg>
+          </button>
+          <button class="btn" id="btnRedo" title="Redo">
+            <svg class="btn-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M21 7v6h-6"></path>
+              <path d="M3 17a9 9 0 0 1 9-9 9 9 0 0 1 6 2.3L21 13"></path>
+            </svg>
+          </button>
+        </div>
+        <div class="toolbar-group">
+          <button class="btn" id="btnCut" title="Cut">
+            <svg class="btn-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="6" cy="6" r="3"></circle>
+              <circle cx="6" cy="18" r="3"></circle>
+              <line x1="20" y1="4" x2="8.12" y2="15.88"></line>
+              <line x1="14.47" y1="14.48" x2="20" y2="20"></line>
+              <line x1="8.12" y1="8.12" x2="12" y2="12"></line>
+            </svg>
+          </button>
+          <button class="btn" id="btnCopy" title="Copy">
+            <svg class="btn-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+              <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+            </svg>
+          </button>
+          <button class="btn" id="btnPaste" title="Paste">
+            <svg class="btn-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"></path>
+              <rect x="8" y="2" width="8" height="4" rx="1" ry="1"></rect>
+            </svg>
+          </button>
+        </div>
+        <div class="toolbar-group">
+          <button class="btn" id="btnInsertImg" title="Insert Image">
+            <svg class="btn-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+              <circle cx="8.5" cy="8.5" r="1.5"></circle>
+              <polyline points="21 15 16 10 5 21"></polyline>
+            </svg>
+          </button>
+          <button class="btn" id="btnInsertLink" title="Insert Link">
+            <svg class="btn-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path>
+              <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path>
+            </svg>
+          </button>
+          <button class="btn" id="btnInsertTbl" title="Insert Table">
+            <svg class="btn-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+              <line x1="3" y1="9" x2="21" y2="9"></line>
+              <line x1="3" y1="15" x2="21" y2="15"></line>
+              <line x1="9" y1="3" x2="9" y2="21"></line>
+              <line x1="15" y1="3" x2="15" y2="21"></line>
+            </svg>
+          </button>
+        </div>
+        <div class="toolbar-group">
+          <button class="btn" id="btnStartShow" title="Start Presentation">
+            <svg class="btn-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <polygon points="3 3 21 12 3 22 3 3"></polygon>
+            </svg>
+          </button>
+          <button class="btn" id="btnThemeToggle" title="Toggle Theme">
+            <svg class="btn-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+            </svg>
+          </button>
+        </div>
+      </div>
+      <div class="format-toolbar">
+        <div class="toolbar-group">
+          <select id="fontFamily" class="format-select" title="Font">
+            <option value="Arial, sans-serif">Arial</option>
+            <option value="Helvetica, sans-serif">Helvetica</option>
+            <option value="Times New Roman, serif">Times New Roman</option>
+            <option value="Georgia, serif">Georgia</option>
+            <option value="Courier New, monospace">Courier New</option>
+            <option value="Verdana, sans-serif">Verdana</option>
+          </select>
+        </div>
+        <div class="toolbar-group">
+          <select id="fontSize" class="format-select" title="Font Size">
+            <option value="1">8pt</option>
+            <option value="2">10pt</option>
+            <option value="3">12pt</option>
+            <option value="4">14pt</option>
+            <option value="5">18pt</option>
+            <option value="6">24pt</option>
+            <option value="7">36pt</option>
+          </select>
+        </div>
+        <div class="toolbar-group">
+          <button class="btn" id="btnBold" title="Bold">
+            <svg class="btn-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M6 4h8a4 4 0 0 1 4 4 4 4 0 0 1-4 4H6z"></path>
+              <path d="M6 12h9a4 4 0 0 1 4 4 4 4 0 0 1-4 4H6z"></path>
+            </svg>
+          </button>
+          <button class="btn" id="btnItalic" title="Italic">
+            <svg class="btn-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <line x1="19" y1="4" x2="10" y2="4"></line>
+              <line x1="14" y1="20" x2="5" y2="20"></line>
+              <line x1="15" y1="4" x2="9" y2="20"></line>
+            </svg>
+          </button>
+          <button class="btn" id="btnUnderline" title="Underline">
+            <svg class="btn-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M6 3v7a6 6 0 0 0 6 6 6 6 0 0 0 6-6V3"></path>
+              <line x1="4" y1="21" x2="20" y2="21"></line>
+            </svg>
+          </button>
+          <button class="btn" id="btnStrikethrough" title="Strikethrough">
+            <svg class="btn-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M5 12h14"></path>
+              <path d="M17 4H7a3 3 0 0 0-2.83 4"></path>
+              <path d="M7 20h10a3 3 0 0 0 2.83-4"></path>
+            </svg>
+          </button>
+
+        </div>
+        <div class="toolbar-group">
+          <button class="btn" id="btnTextColor" title="Text Color">
+            <svg class="btn-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M9 3h6v2H9z"></path>
+              <path d="M7 5h10v3H7z"></path>
+              <line x1="12" y1="8" x2="12" y2="19"></line>
+              <path d="M8 19h8"></path>
+            </svg>
+            <input type="color" id="colorPicker" class="color-picker" value="#000000">
+          </button>
+          <button class="btn" id="btnHighlight" title="Highlight">
+            <svg class="btn-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M3 14h3a2 2 0 0 1 2 2v3a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-7a9 9 0 0 1 18 0v7a2 2 0 0 1-2 2h-1a2 2 0 0 1-2-2v-3a2 2 0 0 1 2-2h3"></path>
+            </svg>
+            <input type="color" id="highlightPicker" class="color-picker" value="#ffff00">
+          </button>
+        </div>
+        <div class="toolbar-group">
+          <button class="btn" id="btnAlignLeft" title="Align Left">
+            <svg class="btn-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <line x1="21" y1="6" x2="3" y2="6"></line>
+              <line x1="15" y1="12" x2="3" y2="12"></line>
+              <line x1="17" y1="18" x2="3" y2="18"></line>
+            </svg>
+          </button>
+          <button class="btn" id="btnAlignCenter" title="Align Center">
+            <svg class="btn-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <line x1="21" y1="6" x2="3" y2="6"></line>
+              <line x1="18" y1="12" x2="6" y2="12"></line>
+              <line x1="19" y1="18" x2="5" y2="18"></line>
+            </svg>
+          </button>
+          <button class="btn" id="btnAlignRight" title="Align Right">
+            <svg class="btn-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <line x1="21" y1="6" x2="3" y2="6"></line>
+              <line x1="21" y1="12" x2="9" y2="12"></line>
+              <line x1="21" y1="18" x2="7" y2="18"></line>
+            </svg>
+          </button>
+          <button class="btn" id="btnJustify" title="Justify">
+            <svg class="btn-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <line x1="21" y1="6" x2="3" y2="6"></line>
+              <line x1="21" y1="12" x2="3" y2="12"></line>
+              <line x1="21" y1="18" x2="3" y2="18"></line>
+            </svg>
+          </button>
+        </div>
+        <div class="toolbar-group">
+          <button class="btn" id="btnBulletList" title="Bullet List">
+            <svg class="btn-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <line x1="9" y1="6" x2="20" y2="6"></line>
+              <line x1="9" y1="12" x2="20" y2="12"></line>
+              <line x1="9" y1="18" x2="20" y2="18"></line>
+              <circle cx="4" cy="6" r="1"></circle>
+              <circle cx="4" cy="12" r="1"></circle>
+              <circle cx="4" cy="18" r="1"></circle>
+            </svg>
+          </button>
+          <button class="btn" id="btnNumberList" title="Number List">
+            <svg class="btn-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <line x1="10" y1="6" x2="21" y2="6"></line>
+              <line x1="10" y1="12" x2="21" y2="12"></line>
+              <line x1="10" y1="18" x2="21" y2="18"></line>
+              <path d="M4 6h1v4"></path>
+              <path d="M4 10h2"></path>
+              <path d="M6 18H4c0-1 2-2 2-3s-1-1.5-2-1"></path>
+            </svg>
+          </button>
+          <button class="btn" id="btnIndentIncrease" title="Increase Indent">
+            <svg class="btn-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <line x1="21" y1="6" x2="11" y2="6"></line>
+              <line x1="21" y1="12" x2="11" y2="12"></line>
+              <line x1="21" y1="18" x2="11" y2="18"></line>
+              <path d="M7 8l-4 4 4 4"></path>
+            </svg>
+          </button>
+          <button class="btn" id="btnIndentDecrease" title="Decrease Indent">
+            <svg class="btn-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <line x1="21" y1="6" x2="11" y2="6"></line>
+              <line x1="21" y1="12" x2="11" y2="12"></line>
+              <line x1="21" y1="18" x2="11" y2="18"></line>
+              <path d="M3 8l4 4-4 4"></path>
+            </svg>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <div class="document-container">
+
+      <div id="slide-list">
+          <div class="slide-header">
+              <span id="slideNumber">Slide 1 / 1</span>
+          </div>
+          <!-- Slide thumbnails will be generated here -->
+      </div>
+      <div class="document">
+          <div class="page" id="editor" contenteditable="true">
+              <h1>Slide Title</h1>
+              <p>Slide Content goes here.</p>
+          </div>
+      </div>
+      <div class="statusbar">
+        <div class="document-stats">
+          <span id="slideNumber"></span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="footer">
+    <p>SlideBlocks</p>
+  </div>
+
+  <!-- Modal for save as -->
+  <div class="modal" id="saveAsModal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2 class="modal-title">Save Presentation</h2>
+        <button class="modal-close" id="closeSaveAsModal">×</button>
+      </div>
+      <div class="modal-body">
+        <div class="form-group">
+          <label class="form-label" for="presentationName">Presentation name:</label>
+          <input type="text" id="presentationName" class="form-input" placeholder="Enter presentation name">
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="presentationFormat">Format:</label>
+          <select id="presentationFormat" class="form-input">
+            <option value="json">JSON Presentation (.json)</option>
+          </select>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn" id="cancelSaveAs">Cancel</button>
+        <button class="btn btn-primary" id="confirmSaveAs">Save</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal for insert link -->
+  <div class="modal" id="linkModal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2 class="modal-title">Insert Link</h2>
+        <button class="modal-close" id="closeLinkModal">×</button>
+      </div>
+      <div class="modal-body">
+        <div class="form-group">
+          <label class="form-label" for="linkText">Text to display:</label>
+          <input type="text" id="linkText" class="form-input" placeholder="Link text">
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="linkUrl">URL:</label>
+          <input type="url" id="linkUrl" class="form-input" placeholder="https://example.com">
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn" id="cancelLink">Cancel</button>
+        <button class="btn btn-primary" id="confirmLink">Insert</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal for insert table -->
+  <div class="modal" id="tableModal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2 class="modal-title">Insert Table</h2>
+        <button class="modal-close" id="closeTableModal">×</button>
+      </div>
+      <div class="modal-body">
+        <div class="form-group">
+          <label class="form-label" for="tableRows">Rows:</label>
+          <input type="number" id="tableRows" class="form-input" min="1" max="20" value="3">
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="tableCols">Columns:</label>
+          <input type="number" id="tableCols" class="form-input" min="1" max="10" value="3">
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn" id="cancelTable">Cancel</button>
+        <button class="btn btn-primary" id="confirmTable">Insert</button>
+      </div>
+    </div>
+  </div>
+
+    <!-- Modal for insert image -->
+    <div class="modal" id="imageModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title">Insert Image</h2>
+                <button class="modal-close" id="closeImageModal">×</button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label class="form-label" for="imageUrl">Image URL:</label>
+                    <input type="url" id="imageUrl" class="form-input" placeholder="https://example.com/image.jpg">
+                </div>
+                <div class="form-group">
+                    <label class="form-label" for="imageAlt">Alt Text:</label>
+                    <input type="text" id="imageAlt" class="form-input" placeholder="Description of image">
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn" id="cancelImage">Cancel</button>
+                <button class="btn btn-primary" id="confirmImage">Insert</button>
+            </div>
+        </div>
+    </div>
+
+  <!-- Toast notification -->
+  <div id="message"></div>
+
+    <!-- Templates for presentation mode -->
+    <template id="presentation-template">
+        <div class="presentation-mode">
+            <div class="presentation-slide">
+                <!-- Slide content will be injected here -->
+            </div>
+            <div class="presentation-controls">
+                <button class="btn" id="exit-presentation-btn">Exit</button>
+                <button class="btn" id="prev-presentation-btn">Previous</button>
+                <button class="btn" id="next-presentation-btn">Next</button>
+            </div>
+        </div>
+    </template>
+
+  <!-- Include highlight.js for syntax highlighting -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/highlight.min.js"></script>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      // Elements
+      const editor = document.getElementById('editor');
+      const slideNumberEl = document.getElementById('slideNumber');
+      const messageEl = document.getElementById('message');
+      const saveAsModal = document.getElementById('saveAsModal');
+      const linkModal = document.getElementById('linkModal');
+      const tableModal = document.getElementById('tableModal');
+      const imageModal = document.getElementById('imageModal');
+
+      // Slide list container
+      const slideListEl = document.getElementById('slide-list');
+
+      // Presentation template
+      const presentationTemplate = document.getElementById('presentation-template');
+
+      // Initial state
+      let slides = [
+          { content: '<h1>Slide 1</h1><p>This is the first slide.</p>' }
+      ];
+      let currentSlideIndex = 0;
+      let documentHistory = [];
+      let currentHistoryIndex = -1;
+      const maxHistorySize = 50;
+      let isDarkMode = false;
+
+      // Initialize
+      updateSlide();
+      renderSlideList();
+
+      // Functions
+      function updateSlideNumber() {
+        slideNumberEl.textContent = `Slide ${currentSlideIndex + 1} / ${slides.length}`;
+      }
+
+      function updateSlide() {
+        editor.innerHTML = slides[currentSlideIndex].content;
+        updateSlideNumber();
+        updateActiveStates();
+      }
+
+      function renderSlideList() {
+          slideListEl.innerHTML = '';
+          slides.forEach((slide, index) => {
+              const thumbnail = document.createElement('div');
+              thumbnail.classList.add('slide-thumbnail');
+              if (index === currentSlideIndex) {
+                  thumbnail.classList.add('active');
+              }
+              thumbnail.textContent = `Slide ${index + 1}`;
+              thumbnail.addEventListener('click', () => {
+                  currentSlideIndex = index;
+                  updateSlide();
+                  renderSlideList();
+              });
+              slideListEl.appendChild(thumbnail);
+          });
+      }
+
+        // Save content to history
+        function saveToHistory(content) {
+            // If we're not at the end of the history, truncate it
+            if (currentHistoryIndex < documentHistory.length - 1) {
+                documentHistory = documentHistory.slice(0, currentHistoryIndex + 1);
+            }
+
+            // Add the new state to history
+            documentHistory.push(content);
+            currentHistoryIndex = documentHistory.length - 1;
+
+            // Keep history size in check
+            if (documentHistory.length > maxHistorySize) {
+                documentHistory.shift();
+                currentHistoryIndex--;
+            }
+        }
+
+        // Function to show toast messages
+        function showMessage(text, type = 'success') {
+            messageEl.textContent = text;
+            messageEl.className = type === 'success' ? 'message-success' : 'message-error';
+            messageEl.classList.add('show-message');
+
+            setTimeout(() => {
+                messageEl.classList.remove('show-message');
+            }, 3000);
+        }
+
+      // Format Buttons
+      document.getElementById('btnBold').addEventListener('click', () => {
+        document.execCommand('bold', false, null);
+        saveToHistory(editor.innerHTML);
+        updateActiveStates();
+      });
+
+      document.getElementById('btnItalic').addEventListener('click', () => {
+        document.execCommand('italic', false, null);
+        saveToHistory(editor.innerHTML);
+        updateActiveStates();
+      });
+
+      document.getElementById('btnUnderline').addEventListener('click', () => {
+        document.execCommand('underline', false, null);
+        saveToHistory(editor.innerHTML);
+        updateActiveStates();
+      });
+
+      document.getElementById('btnStrikethrough').addEventListener('click', () => {
+        document.execCommand('strikeThrough', false, null);
+        saveToHistory(editor.innerHTML);
+        updateActiveStates();
+      });
+
+      // Alignment
+      document.getElementById('btnAlignLeft').addEventListener('click', () => {
+        document.execCommand('justifyLeft', false, null);
+        saveToHistory(editor.innerHTML);
+        updateActiveStates();
+      });
+
+      document.getElementById('btnAlignCenter').addEventListener('click', () => {
+        document.execCommand('justifyCenter', false, null);
+        saveToHistory(editor.innerHTML);
+        updateActiveStates();
+      });
+
+      document.getElementById('btnAlignRight').addEventListener('click', () => {
+        document.execCommand('justifyRight', false, null);
+        saveToHistory(editor.innerHTML);
+        updateActiveStates();
+      });
+
+      document.getElementById('btnJustify').addEventListener('click', () => {
+        document.execCommand('justifyFull', false, null);
+        saveToHistory(editor.innerHTML);
+        updateActiveStates();
+      });
+
+      // Lists
+      document.getElementById('btnBulletList').addEventListener('click', () => {
+        document.execCommand('insertUnorderedList', false, null);
+        saveToHistory(editor.innerHTML);
+        updateActiveStates();
+      });
+
+      document.getElementById('btnNumberList').addEventListener('click', () => {
+        document.execCommand('insertOrderedList', false, null);
+        saveToHistory(editor.innerHTML);
+        updateActiveStates();
+      });
+
+      // Indentation
+      document.getElementById('btnIndentIncrease').addEventListener('click', () => {
+        document.execCommand('indent', false, null);
+        saveToHistory(editor.innerHTML);
+      });
+
+      document.getElementById('btnIndentDecrease').addEventListener('click', () => {
+        document.execCommand('outdent', false, null);
+        saveToHistory(editor.innerHTML);
+      });
+
+      // Font family and size
+      document.getElementById('fontFamily').addEventListener('change', (e) => {
+        document.execCommand('fontName', false, e.target.value);
+        saveToHistory(editor.innerHTML);
+      });
+
+      document.getElementById('fontSize').addEventListener('change', (e) => {
+        document.execCommand('fontSize', false, e.target.value);
+        saveToHistory(editor.innerHTML);
+      });
+
+      // Color pickers
+      document.getElementById('colorPicker').addEventListener('input', (e) => {
+        document.execCommand('foreColor', false, e.target.value);
+        saveToHistory(editor.innerHTML);
+      });
+
+      document.getElementById('highlightPicker').addEventListener('input', (e) => {
+        document.execCommand('hiliteColor', false, e.target.value);
+        saveToHistory(editor.innerHTML);
+      });
+
+      // Undo/Redo
+      document.getElementById('btnUndo').addEventListener('click', () => {
+        if (currentHistoryIndex > 0) {
+          currentHistoryIndex--;
+          editor.innerHTML = documentHistory[currentHistoryIndex];
+          updateSlide();
+        }
+      });
+
+      document.getElementById('btnRedo').addEventListener('click', () => {
+        if (currentHistoryIndex < documentHistory.length - 1) {
+          currentHistoryIndex++;
+          editor.innerHTML = documentHistory[currentHistoryIndex];
+          updateSlide();
+        }
+      });
+
+      // Cut, Copy, Paste
+      document.getElementById('btnCut').addEventListener('click', () => {
+        document.execCommand('cut', false, null);
+        saveToHistory(editor.innerHTML);
+      });
+
+      document.getElementById('btnCopy').addEventListener('click', () => {
+        document.execCommand('copy', false, null);
+        saveToHistory(editor.innerHTML);
+      });
+
+      document.getElementById('btnPaste').addEventListener('click', () => {
+        document.execCommand('paste', false, null);
+        saveToHistory(editor.innerHTML);
+      });
+
+      // Insert Link
+      document.getElementById('btnInsertLink').addEventListener('click', () => {
+        showLinkModal();
+      });
+
+      document.getElementById('confirmLink').addEventListener('click', () => {
+        const text = document.getElementById('linkText').value;
+        const url = document.getElementById('linkUrl').value;
+
+        if (url) {
+          const selection = window.getSelection();
+          const range = selection.getRangeAt(0);
+
+          const link = document.createElement('a');
+          link.href = url;
+          link.textContent = text || url;
+
+          range.deleteContents();
+          range.insertNode(link);
+
+          hideLinkModal();
+          saveToHistory(editor.innerHTML);
+          updateSlide();
+        }
+      });
+
+      document.getElementById('cancelLink').addEventListener('click', hideLinkModal);
+      document.getElementById('closeLinkModal').addEventListener('click', hideLinkModal);
+
+      // Insert Table
+      document.getElementById('btnInsertTbl').addEventListener('click', () => {
+        showTableModal();
+      });
+
+      document.getElementById('confirmTable').addEventListener('click', () => {
+        const rows = parseInt(document.getElementById('tableRows').value);
+        const cols = parseInt(document.getElementById('tableCols').value);
+
+        if (rows && cols) {
+          insertTable(rows, cols);
+          hideTableModal();
+          saveToHistory(editor.innerHTML);
+          updateSlide();
+        }
+      });
+
+      document.getElementById('cancelTable').addEventListener('click', hideTableModal);
+      document.getElementById('closeTableModal').addEventListener('click', hideTableModal);
+
+       // Insert Image
+       document.getElementById('btnInsertImg').addEventListener('click', () => {
+        showImageModal();
+      });
+
+      document.getElementById('confirmImage').addEventListener('click', () => {
+          const imageUrl = document.getElementById('imageUrl').value;
+          const imageAlt = document.getElementById('imageAlt').value;
+
+          if (imageUrl) {
+              insertImage(imageUrl, imageAlt);
+              hideImageModal();
+          }
+      });
+
+      document.getElementById('cancelImage').addEventListener('click', hideImageModal);
+      document.getElementById('closeImageModal').addEventListener('click', hideImageModal);
+
+      // Save/Open
+      document.getElementById('btnSaveShow').addEventListener('click', () => {
+        showSaveAsModal();
+      });
+
+      document.getElementById('confirmSaveAs').addEventListener('click', () => {
+        const name = document.getElementById('presentationName').value || 'presentation';
+        const format = document.getElementById('presentationFormat').value;
+
+        savePresentation(name, format);
+        hideSaveAsModal();
+      });
+
+      document.getElementById('cancelSaveAs').addEventListener('click', hideSaveAsModal);
+      document.getElementById('closeSaveAsModal').addEventListener('click', hideSaveAsModal);
+
+      document.getElementById('btnOpenShow').addEventListener('click', () => {
+        const input = document.createElement('input');
+        input.type = 'file';
+        input.accept = '.json';
+
+        input.onchange = (e) => {
+          const file = e.target.files[0];
+          if (file) {
+            const reader = new FileReader();
+            reader.onload = (event) => {
+                try {
+                    const data = JSON.parse(event.target.result);
+                    if (data.slides && Array.isArray(data.slides)) {
+                        slides = data.slides;
+                        currentSlideIndex = 0;
+                        updateSlide();
+                        renderSlideList();
+                        showMessage('Presentation loaded successfully!');
+                    } else {
+                        showMessage('Invalid presentation file format!', 'error');
+                    }
+                } catch (error) {
+                    console.error('Error parsing presentation file:', error);
+                    showMessage('Error loading presentation!', 'error');
+                }
+            };
+            reader.readAsText(file);
+          }
+        };
+
+        input.click();
+      });
+
+      // Slide Management Buttons
+      document.getElementById('btnNewSlide').addEventListener('click', () => {
+        slides.splice(currentSlideIndex + 1, 0, { content: '<h1>New Slide</h1><p>Enter your content here.</p>' });
+        currentSlideIndex++;
+        updateSlide();
+        renderSlideList();
+        saveToHistory(editor.innerHTML);
+      });
+
+      document.getElementById('btnDeleteSlide').addEventListener('click', () => {
+          if (slides.length > 1) {
+              slides.splice(currentSlideIndex, 1);
+              if (currentSlideIndex >= slides.length) {
+                  currentSlideIndex = slides.length - 1;
+              }
+              updateSlide();
+              renderSlideList();
+              saveToHistory(editor.innerHTML);
+          } else {
+              showMessage("Cannot delete the last slide!", "error");
+          }
+      });
+
+      document.getElementById('btnDuplicateSlide').addEventListener('click', () => {
+        const newSlide = { ...slides[currentSlideIndex] };
+        slides.splice(currentSlideIndex + 1, 0, newSlide);
+        currentSlideIndex++;
+        updateSlide();
+        renderSlideList();
+        saveToHistory(editor.innerHTML);
+      });
+
+      document.getElementById('btnMoveSlideLeft').addEventListener('click', () => {
+          if (currentSlideIndex > 0) {
+              const temp = slides[currentSlideIndex];
+              slides[currentSlideIndex] = slides[currentSlideIndex - 1];
+              slides[currentSlideIndex - 1] = temp;
+              currentSlideIndex--;
+              updateSlide();
+              renderSlideList();
+          }
+      });
+
+      document.getElementById('btnMoveSlideRight').addEventListener('click', () => {
+          if (currentSlideIndex < slides.length - 1) {
+              const temp = slides[currentSlideIndex];
+              slides[currentSlideIndex] = slides[currentSlideIndex + 1];
+              slides[currentSlideIndex + 1] = temp;
+              currentSlideIndex++;
+              updateSlide();
+              renderSlideList();
+          }
+      });
+
+      // Start Show
+      document.getElementById('btnStartShow').addEventListener('click', startPresentation);
+
+      // Theme Toggle
+      document.getElementById('btnThemeToggle').addEventListener('click', toggleTheme);
+
+      // Editor events
+      editor.addEventListener('input', function() {
+        slides[currentSlideIndex].content = editor.innerHTML;
+        updateSlideNumber();
+        saveToHistory(editor.innerHTML);
+      });
+
+      editor.addEventListener('click', updateActiveStates);
+      editor.addEventListener('keyup', updateActiveStates);
+
+      // Helper functions
+
+      function updateActiveStates() {
+        const buttons = {
+          'btnBold': 'bold',
+          'btnItalic': 'italic',
+          'btnUnderline': 'underline',
+          'btnStrikethrough': 'strikeThrough',
+          'btnAlignLeft': 'justifyLeft',
+          'btnAlignCenter': 'justifyCenter',
+          'btnAlignRight': 'justifyRight',
+          'btnJustify': 'justifyFull',
+          'btnBulletList': 'insertUnorderedList',
+          'btnNumberList': 'insertOrderedList'
+        };
+
+        for (const [id, command] of Object.entries(buttons)) {
+          const button = document.getElementById(id);
+          if (document.queryCommandState(command)) {
+            button.classList.add('activeBtn');
+          } else {
+            button.classList.remove('activeBtn');
+          }
+        }
+
+        // Update font family and size based on selection
+        const fontFamily = document.queryCommandValue('fontName');
+        const fontSize = document.queryCommandValue('fontSize');
+
+        if (fontFamily) {
+          const fontSelect = document.getElementById('fontFamily');
+          for (let i = 0; i < fontSelect.options.length; i++) {
+            if (fontSelect.options[i].value === fontFamily) {
+              fontSelect.selectedIndex = i;
+              break;
+            }
+          }
+        }
+
+        if (fontSize) {
+          const sizeSelect = document.getElementById('fontSize');
+          for (let i = 0; i < sizeSelect.options.length; i++) {
+            if (sizeSelect.options[i].value === fontSize) {
+              sizeSelect.selectedIndex = i;
+              break;
+            }
+          }
+        }
+      }
+
+      function savePresentation(name, format) {
+        if (format === 'json') {
+          const data = JSON.stringify({ slides: slides });
+
+          const blob = new Blob([data], { type: 'application/json' });
+          const url = URL.createObjectURL(blob);
+
+          const a = document.createElement('a');
+          a.href = url;
+          a.download = `${name}.json`;
+          document.body.appendChild(a);
+          a.click();
+          document.body.removeChild(a);
+          URL.revokeObjectURL(url);
+
+          showMessage('Presentation saved successfully!');
+        }
+      }
+
+      function insertTable(rows, cols) {
+        let tableHTML = '<table border="1" style="width:100%; border-collapse: collapse;">';
+
+        // Create header row
+        tableHTML += '<thead><tr>';
+        for (let i = 0; i < cols; i++) {
+          tableHTML += `<th style="border: 1px solid #ccc; padding: 8px;">Header ${i+1}</th>`;
+        }
+        tableHTML += '</tr></thead><tbody>';
+
+        // Create body rows
+        for (let i = 0; i < rows - 1; i++) {
+          tableHTML += '<tr>';
+          for (let j = 0; j < cols; j++) {
+            tableHTML += `<td style="border: 1px solid #ccc; padding: 8px;">Cell ${i+1},${j+1}</td>`;
+          }
+          tableHTML += '</tr>';
+        }
+
+        tableHTML += '</tbody></table><p></p>';
+
+        document.execCommand('insertHTML', false, tableHTML);
+      }
+
+      function insertImage(url, alt) {
+          const img = document.createElement('img');
+          img.src = url;
+          img.alt = alt;
+          document.execCommand('insertHTML', false, img.outerHTML);
+          saveToHistory(editor.innerHTML);
+          updateSlide();
+      }
+
+      // Modal functions
+      function showSaveAsModal() {
+        saveAsModal.style.display = 'flex';
+      }
+
+      function hideSaveAsModal() {
+      saveAsModal.style.display = 'none';
+      document.getElementById('presentationName').value = '';
+    }
+
+      function showLinkModal() {
+        linkModal.style.display = 'flex';
+
+        // Pre-fill with selected text
+        const selection = window.getSelection();
+        if (selection.toString()) {
+          document.getElementById('linkText').value = selection.toString();
+        }
+      }
+
+      function hideLinkModal() {
+        linkModal.style.display = 'none';
+        document.getElementById('linkText').value = '';
+        document.getElementById('linkUrl').value = '';
+      }
+
+      function showTableModal() {
+        tableModal.style.display = 'flex';
+      }
+
+      function hideTableModal() {
+        tableModal.style.display = 'none';
+      }
+
+      function showImageModal() {
+          imageModal.style.display = 'flex';
+      }
+
+      function hideImageModal() {
+          imageModal.style.display = 'none';
+          document.getElementById('imageUrl').value = '';
+          document.getElementById('imageAlt').value = '';
+      }
+
+      function startPresentation() {
+          // Create presentation mode from template
+          const template = presentationTemplate.content.cloneNode(true);
+          const presentationMode = template.querySelector('.presentation-mode');
+          const presentationSlide = template.querySelector('.presentation-slide');
+
+          // Set initial slide content
+          presentationSlide.innerHTML = slides[currentSlideIndex].content;
+
+          // Add to DOM
+          document.body.appendChild(template);
+
+          // Get newly added DOM elements
+          const exitBtn = document.getElementById('exit-presentation-btn');
+          const prevBtn = document.getElementById('prev-presentation-btn');
+          const nextBtn = document.getElementById('next-presentation-btn');
+
+          // Setup event listeners for presentation mode
+          exitBtn.addEventListener('click', exitPresentation);
+          prevBtn.addEventListener('click', presentationPrevious);
+          nextBtn.addEventListener('click', presentationNext);
+          document.addEventListener('keydown', handlePresentationKeydown);
+
+          // Update button states
+          updatePresentationButtonStates();
+      }
+
+      function exitPresentation() {
+          // Remove presentation mode
+          const presentationMode = document.querySelector('.presentation-mode');
+          if (presentationMode) {
+              document.body.removeChild(presentationMode);
+          }
+
+          // Remove keydown listener
+          document.removeEventListener('keydown', handlePresentationKeydown);
+      }
+
+      function presentationPrevious() {
+          if (currentSlideIndex > 0) {
+              currentSlideIndex -= 1;
+              updatePresentationSlide();
+              updatePresentationButtonStates();
+          }
+      }
+
+      function presentationNext() {
+          if (currentSlideIndex < slides.length - 1) {
+              currentSlideIndex += 1;
+              updatePresentationSlide();
+              updatePresentationButtonStates();
+          }
+      }
+
+      function updatePresentationSlide() {
+          const presentationSlide = document.querySelector('.presentation-slide');
+          if (presentationSlide) {
+              presentationSlide.innerHTML = slides[currentSlideIndex].content;
+          }
+      }
+
+      function updatePresentationButtonStates() {
+          const prevBtn = document.getElementById('prev-presentation-btn');
+          const nextBtn = document.getElementById('next-presentation-btn');
+
+          if (prevBtn && nextBtn) {
+              prevBtn.disabled = currentSlideIndex === 0;
+              nextBtn.disabled = currentSlideIndex === slides.length - 1;
+          }
+      }
+
+      function handlePresentationKeydown(event) {
+          switch (event.key) {
+              case 'Escape':
+                  exitPresentation();
+                  break;
+              case 'ArrowLeft':
+                  presentationPrevious();
+                  break;
+              case 'ArrowRight':
+              case ' ':
+                  presentationNext();
+                  break;
+          }
+      }
+
+      function toggleTheme() {
+        const body = document.body;
+        isDarkMode = !isDarkMode;
+
+        if (isDarkMode) {
+          body.classList.add('dark-mode');
+        } else {
+          body.classList.remove('dark-mode');
+        }
+
+        // Update text content of the theme toggle button
+        document.getElementById('btnThemeToggle').innerHTML = isDarkMode
+            ? `<svg class="btn-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <circle cx="12" cy="12" r="5"></circle>
+                  <line x1="12" y1="1" x2="12" y2="3"></line>
+                  <line x1="12" y1="21" x2="12" y2="23"></line>
+                  <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+                  <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+                  <line x1="1" y1="12" x2="3" y2="12"></line>
+                  <line x1="21" y1="12" x2="23" y2="12"></line>
+                  <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+                  <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+                </svg>`
+            : `<svg class="btn-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+            </svg>`;
+      }
+
+        function setActiveSlide(index) {
+            currentSlideIndex = index;
+            updateSlide();
+            renderSlideList();
+        }
+
+        function renderSlideList() {
+            slideListEl.innerHTML = '';
+            slides.forEach((slide, index) => {
+                const thumbnail = document.createElement('div');
+                thumbnail.classList.add('slide-thumbnail');
+                thumbnail.textContent = `Slide ${index + 1}`;
+                thumbnail.addEventListener('click', () => {
+                    setActiveSlide(index);
+                });
+
+                if (index === currentSlideIndex) {
+                    thumbnail.classList.add('active');
+                }
+
+                slideListEl.appendChild(thumbnail);
+            });
+        }
+
+      // Save the initial state
+      saveToHistory(editor.innerHTML);
+      updateActiveStates();
+    });
+  </script>
+</body>
+</html>
