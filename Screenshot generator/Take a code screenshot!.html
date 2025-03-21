@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Take a screenshot! <\code></title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+            background-color: #f5f5f7;
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+        }
+        .container {
+            max-width: 1000px;
+            width: 100%;
+            background-color: white;
+            border-radius: 10px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+        .header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+        .app-title {
+            font-size: 24px;
+            font-weight: bold;
+            color: #333;
+            margin: 0;
+            flex-grow: 0;
+        }
+        .title-input {
+            flex-grow: 1;
+            margin: 0 15px;
+        }
+        .header-controls {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+        .code-input-container {
+            margin-bottom: 20px;
+        }
+        .code-input {
+            width: 100%;
+            height: 200px;
+            font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+            padding: 10px;
+            border: 2px solid #ccc;
+            border-radius: 8px;
+            resize: vertical;
+            background-color: #f8f8f8;
+        }
+        .language-selector {
+            margin-top: 10px;
+            padding: 8px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            font-size: 14px;
+        }
+        .button {
+            background-color: #007aff;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            padding: 10px 15px;
+            font-size: 14px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+        .button:hover {
+            background-color: #0056b3;
+        }
+        #windowPreview {
+            width: auto;
+            margin-top: 20px;
+            display: none;
+            box-shadow: none;
+            background-color: transparent;
+            padding: 0;
+        }
+        .mock-window {
+            border-radius: 10px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            margin: 0 auto;
+            width: auto;
+            display: inline-block;
+            background-color: transparent;
+        }
+        .window-titlebar {
+            display: flex;
+            align-items: center;
+            height: 28px;
+            padding: 0 10px;
+            background: linear-gradient(to bottom, #373737, #2a2a2a);
+            border-bottom: 1px solid #000000;
+            border-top-left-radius: 10px;
+            border-top-right-radius: 10px;
+        }
+        .window-buttons {
+            display: flex;
+            gap: 6px;
+            margin-right: 10px;
+        }
+        .window-button {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+        }
+        .close-button {
+            background-color: #ff605c;
+            border: 1px solid #ce4d4a;
+        }
+        .minimize-button {
+            background-color: #ffbd44;
+            border: 1px solid #dea123;
+        }
+        .maximize-button {
+            background-color: #00ca4e;
+            border: 1px solid #11a53c;
+        }
+        .window-title {
+            flex-grow: 1;
+            text-align: center;
+            font-size: 13px;
+            font-weight: 500;
+            color: #ffffff;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+        .window-content {
+            background-color: #1e1e1e;
+            border-bottom-left-radius: 10px;
+            border-bottom-right-radius: 10px;
+            overflow: hidden;
+            padding: 0;
+        }
+        pre.code-display {
+            margin: 0;
+            padding: 10px;
+            background-color: transparent;
+            font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+            font-size: 14px;
+            overflow: visible;
+            color: #d4d4d4;
+            white-space: pre;
+        }
+        .hidden {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="app-title">Take a screenshot! <\code></div>
+            <div class="title-input">
+                <input type="text" id="windowTitle" placeholder="Window Title" style="width: 100%;">
+            </div>
+            <div class="header-controls">
+                <button class="button" id="generateBtn">Generate Preview</button>
+                <button class="button" id="downloadBtn" disabled>Export</button>
+            </div>
+        </div>
+        
+        <div class="code-input-container">
+            <textarea id="codeInput" class="code-input" placeholder="Paste your code here..."></textarea>
+            <div style="margin-top: 10px;">
+                <select id="languageSelector" class="language-selector">
+                    <option value="javascript">JavaScript</option>
+                    <option value="html">HTML</option>
+                    <option value="css">CSS</option>
+                    <option value="python">Python</option>
+                    <option value="java">Java</option>
+                    <option value="csharp">C#</option>
+                    <option value="cpp">C++</option>
+                    <option value="typescript">TypeScript</option>
+                    <option value="php">PHP</option>
+                    <option value="ruby">Ruby</option>
+                    <option value="swift">Swift</option>
+                    <option value="go">Go</option>
+                    <option value="rust">Rust</option>
+                    <option value="sql">SQL</option>
+                    <option value="bash">Bash</option>
+                    <option value="shell">Shell</option>
+                    <option value="terminal">Terminal</option>
+                </select>
+            </div>
+        </div>
+    </div>
+    
+    <div id="windowPreview" class="container">
+        <div class="mock-window" id="mockWindow">
+            <div class="window-titlebar" id="titlebar">
+                <div class="window-buttons">
+                    <div class="window-button close-button"></div>
+                    <div class="window-button minimize-button"></div>
+                    <div class="window-button maximize-button"></div>
+                </div>
+                <div class="window-title" id="titleText">Window Title</div>
+                <div style="width: 50px;"></div>
+            </div>
+            <div class="window-content" id="windowContent">
+                <pre class="code-display"><code id="codeDisplay"></code></pre>
+            </div>
+        </div>
+    </div>
+
+    <!-- Load Highlight.js for syntax highlighting -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/highlight.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/atom-one-dark.min.css">
+    
+    <!-- Load html2canvas for screenshot generation -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    
+    <script>
+        // Dom elements
+        const codeInput = document.getElementById('codeInput');
+        const languageSelector = document.getElementById('languageSelector');
+        const generateBtn = document.getElementById('generateBtn');
+        const downloadBtn = document.getElementById('downloadBtn');
+        const windowPreview = document.getElementById('windowPreview');
+        const mockWindow = document.getElementById('mockWindow');
+        const titleText = document.getElementById('titleText');
+        const windowTitle = document.getElementById('windowTitle');
+        const codeDisplay = document.getElementById('codeDisplay');
+        const windowContent = document.getElementById('windowContent');
+        
+        let codeGenerated = false;
+        
+        // Event listeners
+        generateBtn.addEventListener('click', generateCodePreview);
+        downloadBtn.addEventListener('click', downloadScreenshot);
+        windowTitle.addEventListener('input', updateWindowTitle);
+        
+        // Functions
+        function updateWindowTitle() {
+            titleText.textContent = windowTitle.value || 'Untitled Code';
+        }
+        
+        function generateCodePreview() {
+            const code = codeInput.value.trim();
+            if (!code) {
+                alert('Please enter some code first.');
+                return;
+            }
+            
+            const language = languageSelector.value;
+            
+            // Set title if not already set
+            if (!windowTitle.value) {
+                windowTitle.value = language.charAt(0).toUpperCase() + language.slice(1) + ' Code';
+                updateWindowTitle();
+            }
+            
+            // Set the code in the preview
+            codeDisplay.className = `language-${language}`;
+            codeDisplay.textContent = code;
+            
+            // Apply syntax highlighting
+            hljs.highlightElement(codeDisplay);
+            
+            // Show preview
+            windowPreview.style.display = 'block';
+            
+            // Set window to auto-size to content
+            mockWindow.style.width = 'auto';
+            mockWindow.style.display = 'inline-block';
+            windowPreview.style.width = 'auto';
+            windowPreview.style.display = 'flex';
+            windowPreview.style.justifyContent = 'center';
+            
+            codeGenerated = true;
+            downloadBtn.disabled = false;
+            
+            // Scroll to the preview
+            windowPreview.scrollIntoView({ behavior: 'smooth' });
+        }
+        
+        function downloadScreenshot() {
+            if (!codeGenerated) return;
+            
+            // Use html2canvas to capture the mock window with transparent background
+            html2canvas(mockWindow, {
+                backgroundColor: null,
+                scale: 2, // Higher resolution
+                allowTaint: true,
+                useCORS: true
+            }).then(canvas => {
+                const link = document.createElement('a');
+                link.download = `${windowTitle.value || 'code'}_preview.png`;
+                link.href = canvas.toDataURL("image/png");
+                link.click();
+            });
+        }
+        
+        // Initialize with a sample code
+        window.addEventListener('DOMContentLoaded', () => {
+            codeInput.value = `function greet(name) {\n  console.log("Hello, " + name + "!");\n  return "Greeting complete.";\n}\n\n// Call the function\ngreet("World");`;
+        });
+    </script>
+</body>
+</html>

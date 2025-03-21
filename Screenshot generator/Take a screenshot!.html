@@ -1,0 +1,413 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Take a Screenshot!</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+            background-color: #f5f5f7;
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+        }
+        .container {
+            max-width: 1000px;
+            width: 100%;
+            background-color: white;
+            border-radius: 10px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+        .header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+        .app-title {
+            font-size: 24px;
+            font-weight: bold;
+            color: #333;
+            margin: 0;
+            flex-grow: 0;
+        }
+        .title-input {
+            flex-grow: 1;
+            margin: 0 15px;
+        }
+        .header-controls {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+        .upload-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin-bottom: 20px;
+            padding: 20px;
+            border: 2px dashed #ccc;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        .upload-container:hover {
+            border-color: #007aff;
+            background-color: #f0f8ff;
+        }
+        .upload-container p {
+            margin: 10px 0;
+            color: #666;
+        }
+        input[type="text"], input[type="number"] {
+            padding: 8px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            font-size: 14px;
+        }
+        .button {
+            background-color: #007aff;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            padding: 10px 15px;
+            font-size: 14px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+        .button:hover {
+            background-color: #0056b3;
+        }
+        .toggle-container {
+            display: flex;
+            align-items: center;
+        }
+        .toggle-label {
+            margin-right: 8px;
+            font-size: 14px;
+        }
+        .toggle {
+            position: relative;
+            display: inline-block;
+            width: 52px;
+            height: 26px;
+        }
+        .toggle input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #ccc;
+            transition: .4s;
+            border-radius: 26px;
+        }
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 18px;
+            width: 18px;
+            left: 4px;
+            bottom: 4px;
+            background-color: white;
+            transition: .4s;
+            border-radius: 50%;
+        }
+        input:checked + .slider {
+            background-color: #2196F3;
+        }
+        input:checked + .slider:before {
+            transform: translateX(26px);
+        }
+        .padding-input {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .padding-input input {
+            width: 60px;
+        }
+        #windowPreview {
+            width: 100%;
+            margin-top: 20px;
+            display: none;
+        }
+        .mock-window {
+            border-radius: 10px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            margin: 0 auto;
+            max-width: 100%;
+            background-color: transparent;
+        }
+        .window-titlebar {
+            display: flex;
+            align-items: center;
+            height: 28px;
+            padding: 0 10px;
+            background: linear-gradient(to bottom, #373737, #2a2a2a);
+            border-bottom: 1px solid #000000;
+            border-top-left-radius: 10px;
+            border-top-right-radius: 10px;
+        }
+        .window-buttons {
+            display: flex;
+            gap: 6px;
+            margin-right: 10px;
+        }
+        .window-button {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+        }
+        .close-button {
+            background-color: #ff605c;
+            border: 1px solid #ce4d4a;
+        }
+        .minimize-button {
+            background-color: #ffbd44;
+            border: 1px solid #dea123;
+        }
+        .maximize-button {
+            background-color: #00ca4e;
+            border: 1px solid #11a53c;
+        }
+        .window-title {
+            flex-grow: 1;
+            text-align: center;
+            font-size: 13px;
+            font-weight: 500;
+            color: #ffffff;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+        .window-content {
+            background-color: #1e1e1e;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            border-bottom-left-radius: 10px;
+            border-bottom-right-radius: 10px;
+            overflow: hidden;
+        }
+        .window-content img {
+            max-width: 100%;
+            display: block;
+        }
+        .hidden {
+            display: none;
+        }
+        #fileInput {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="app-title">Take a Screenshot!</div>
+            <div class="title-input">
+                <input type="text" id="windowTitle" placeholder="Window Title" style="width: 100%;">
+            </div>
+            <div class="header-controls">
+                <div class="toggle-container">
+                    <span class="toggle-label">Light</span>
+                    <label class="toggle">
+                        <input type="checkbox" id="themeToggle" checked>
+                        <span class="slider"></span>
+                    </label>
+                    <span class="toggle-label">Dark</span>
+                </div>
+                <div class="padding-input">
+                    <span>Padding:</span>
+                    <input type="number" id="windowPadding" value="0" min="0" max="50">
+                </div>
+                <button class="button" id="downloadBtn" disabled>Export</button>
+            </div>
+        </div>
+        
+        <div class="upload-container" id="dropZone">
+            <input type="file" id="fileInput" accept="image/*">
+            <p>Click or drag and drop an image here</p>
+            <p>Supported formats: PNG, JPG, GIF, etc.</p>
+        </div>
+    </div>
+    
+    <div id="windowPreview" class="container">
+        <div class="mock-window" id="mockWindow">
+            <div class="window-titlebar" id="titlebar">
+                <div class="window-buttons">
+                    <div class="window-button close-button"></div>
+                    <div class="window-button minimize-button"></div>
+                    <div class="window-button maximize-button"></div>
+                </div>
+                <div class="window-title" id="titleText">Window Title</div>
+                <div style="width: 50px;"></div>
+            </div>
+            <div class="window-content" id="windowContent">
+                <img id="previewImage" src="" alt="Preview">
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Dom elements
+        const fileInput = document.getElementById('fileInput');
+        const dropZone = document.getElementById('dropZone');
+        const downloadBtn = document.getElementById('downloadBtn');
+        const windowPreview = document.getElementById('windowPreview');
+        const mockWindow = document.getElementById('mockWindow');
+        const titleText = document.getElementById('titleText');
+        const windowTitle = document.getElementById('windowTitle');
+        const themeToggle = document.getElementById('themeToggle');
+        const windowPadding = document.getElementById('windowPadding');
+        const titlebar = document.getElementById('titlebar');
+        const windowContent = document.getElementById('windowContent');
+        const previewImage = document.getElementById('previewImage');
+        
+        let imageFileName = '';
+        let imageLoaded = false;
+        
+        // Event listeners
+        dropZone.addEventListener('click', () => fileInput.click());
+        
+        fileInput.addEventListener('change', handleFileSelect);
+        
+        dropZone.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            dropZone.style.borderColor = '#007aff';
+            dropZone.style.backgroundColor = '#f0f8ff';
+        });
+        
+        dropZone.addEventListener('dragleave', (e) => {
+            e.preventDefault();
+            dropZone.style.borderColor = '#ccc';
+            dropZone.style.backgroundColor = 'transparent';
+        });
+        
+        dropZone.addEventListener('drop', (e) => {
+            e.preventDefault();
+            dropZone.style.borderColor = '#ccc';
+            dropZone.style.backgroundColor = 'transparent';
+            
+            const files = e.dataTransfer.files;
+            if (files.length > 0) {
+                fileInput.files = files;
+                handleFileSelect(e);
+            }
+        });
+        
+        downloadBtn.addEventListener('click', downloadScreenshot);
+        
+        windowTitle.addEventListener('input', updateWindowTitle);
+        themeToggle.addEventListener('change', updateTheme);
+        windowPadding.addEventListener('input', updatePadding);
+        
+        // Functions
+        function handleFileSelect(e) {
+            const file = fileInput.files[0];
+            if (!file) return;
+            
+            const reader = new FileReader();
+            
+            reader.onload = function(event) {
+                const img = new Image();
+                img.onload = function() {
+                    previewImage.src = event.target.result;
+                    
+                    // Extract filename without extension
+                    imageFileName = file.name.replace(/\.[^/.]+$/, "");
+                    windowTitle.value = imageFileName;
+                    updateWindowTitle();
+                    
+                    imageLoaded = true;
+                    downloadBtn.disabled = false;
+                    
+                    // Auto-generate the screenshot
+                    generateScreenshot();
+                };
+                img.src = event.target.result;
+            };
+            
+            reader.readAsDataURL(file);
+        }
+        
+        function updateWindowTitle() {
+            titleText.textContent = windowTitle.value || 'Untitled Window';
+        }
+        
+        function updateTheme() {
+            const isDarkMode = themeToggle.checked;
+            
+            if (isDarkMode) {
+                // Dark mode
+                titlebar.style.background = 'linear-gradient(to bottom, #373737, #2a2a2a)';
+                titlebar.style.borderBottom = '1px solid #000000';
+                titleText.style.color = '#ffffff';
+                windowContent.style.backgroundColor = '#1e1e1e';
+            } else {
+                // Light mode
+                titlebar.style.background = 'linear-gradient(to bottom, #ebebeb, #d5d5d5)';
+                titlebar.style.borderBottom = '1px solid #b1b1b1';
+                titleText.style.color = '#333333';
+                windowContent.style.backgroundColor = 'transparent';
+            }
+        }
+        
+        function updatePadding() {
+            const padding = parseInt(windowPadding.value) || 0;
+            windowContent.style.padding = `${padding}px`;
+        }
+        
+        function generateScreenshot() {
+            if (!imageLoaded) return;
+            
+            windowPreview.style.display = 'block';
+            downloadBtn.disabled = false;
+            
+            // Apply current settings
+            updateWindowTitle();
+            updateTheme();
+            updatePadding();
+            
+            // Scroll to the preview
+            windowPreview.scrollIntoView({ behavior: 'smooth' });
+        }
+        
+        function downloadScreenshot() {
+            if (!imageLoaded) return;
+            
+            // Use html2canvas to capture the mock window with transparent background
+            html2canvas(mockWindow, {
+                backgroundColor: null,
+                scale: 2, // Higher resolution
+                allowTaint: true,
+                useCORS: true
+            }).then(canvas => {
+                const link = document.createElement('a');
+                link.download = `${windowTitle.value || 'mockwindow'}_screenshot.png`;
+                link.href = canvas.toDataURL("image/png");
+                link.click();
+            });
+        }
+        
+        // Initialize html2canvas
+        document.write('<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"><\/script>');
+    </script>
+</body>
+</html>
