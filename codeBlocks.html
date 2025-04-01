@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CodeBlocks</title>
+    <!-- Include Tailwind CSS via CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* Custom CSS for animations (replicating framer-motion effect) */
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(50px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .animate-fadeInUp {
+            animation: fadeInUp 0.5s ease-in-out forwards; /* 'forwards' keeps the final state */
+        }
+
+        /* Ensure elements are hidden initially before animation starts */
+        .animated-card {
+            opacity: 0;
+            /* Ensure grid items stretch by default if needed, though grid usually does this */
+             align-self: stretch;
+        }
+
+        /* Custom gradient text */
+        .gradient-text {
+             background-image: linear-gradient(to right, #a78bfa, #60a5fa); /* purple-400 to blue-500 */
+             -webkit-background-clip: text;
+             background-clip: text;
+             color: transparent;
+        }
+
+        /* Basic body styling from the original component */
+        body {
+            background-color: #111827; /* bg-gray-900 */
+            color: #ffffff; /* text-white */
+        }
+
+        /* Replicating button background gradients with opacity */
+        .btn-grad-purple-blue {
+             background-image: linear-gradient(to right, rgba(168, 85, 247, 0.2), rgba(59, 130, 246, 0.2)); /* from-purple-500/20 to-blue-500/20 */
+             border-color: rgba(168, 85, 247, 0.3); /* border-purple-500/30 */
+             color: #ffffff; /* text-white */
+        }
+        .btn-grad-purple-blue:hover {
+             background-image: linear-gradient(to right, rgba(168, 85, 247, 0.3), rgba(59, 130, 246, 0.3)); /* hover:from-purple-500/30 hover:to-blue-500/30 */
+             border-color: rgba(168, 85, 247, 0.5); /* hover:border-purple-500/50 */
+        }
+        .btn-blue {
+            background-color: rgba(59, 130, 246, 0.2); /* bg-blue-500/20 */
+            color: #93c5fd; /* text-blue-300 */
+            border-color: rgba(59, 130, 246, 0.3); /* border-blue-500/30 */
+        }
+         .btn-blue:hover {
+            background-color: rgba(59, 130, 246, 0.3); /* hover:bg-blue-500/30 */
+            color: #ffffff; /* hover:text-white */
+         }
+         .btn-green {
+            background-color: rgba(34, 197, 94, 0.2); /* bg-green-500/20 */
+            color: #86efac; /* text-green-300 */
+            border-color: rgba(34, 197, 94, 0.3); /* border-green-500/30 */
+         }
+         .btn-green:hover {
+             background-color: rgba(34, 197, 94, 0.3); /* hover:bg-green-500/30 */
+             color: #ffffff; /* hover:text-white */
+         }
+
+         /* SVG Icon styling */
+         .icon {
+             width: 1rem; /* h-4 w-4 */
+             height: 1rem; /* h-4 w-4 */
+             display: inline-block; /* Ensure proper alignment */
+             vertical-align: middle;
+         }
+         .icon-mr {
+             margin-right: 0.5rem; /* mr-2 */
+         }
+
+         /* Card background with opacity and blur */
+         .card-bg {
+             background-color: rgba(31, 41, 55, 0.9); /* bg-gray-800/90 */
+             border-color: rgba(55, 65, 81, 0.5); /* border-gray-700/50 */
+             backdrop-filter: blur(16px); /* backdrop-blur-md */
+             -webkit-backdrop-filter: blur(16px); /* Safari */
+             /* Added for equal height */
+             display: flex;
+             flex-direction: column;
+             height: 100%; /* Ensure card takes full height of grid cell */
+         }
+         .card-bg:hover {
+             border-color: rgba(75, 85, 99, 0.5); /* hover:border-gray-600/50 */
+         }
+         /* Image Overlay Gradient */
+         .img-overlay {
+              background-image: linear-gradient(to top, rgba(0,0,0,0.8), transparent);
+         }
+         /* Card content padding container - Added flex-1 */
+         .card-content-wrapper {
+             flex: 1 1 0%; /* flex-1 */
+             display: flex; /* Added to allow mt-auto on button container */
+             flex-direction: column; /* Added to allow mt-auto on button container */
+         }
+    </style>
+</head>
+<body class="bg-gray-900 text-white">
+
+    <div class="min-h-screen flex flex-col items-center justify-center p-4 md:p-8">
+        <div class="max-w-7xl w-full space-y-8">
+            <!-- Title, Buttons, and Description -->
+            <div class="text-center space-y-6">
+                <h1 class="text-4xl sm:text-6xl font-bold gradient-text">
+                    CodeBlocks
+                </h1>
+                <!-- Button Container -->
+                <div class="flex justify-center items-center gap-4">
+                    <a href="https://bukkbeek.github.io/" target="_blank" rel="noopener noreferrer"
+                       class="inline-flex items-center justify-center px-4 py-2 border rounded-md shadow-lg text-sm font-medium btn-grad-purple-blue transition-all duration-300">
+                        Visit Bukkbeek
+                    </a>
+                    <a href="https://github.com/bukkbeek" target="_blank" rel="noopener noreferrer" aria-label="GitHub Repository"
+                       class="inline-flex items-center justify-center px-3 py-2 border rounded-md shadow-lg text-sm font-medium btn-grad-purple-blue transition-all duration-300">
+                        <!-- Github SVG Icon -->
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon"><path d="M15 22v-4a4.8 4.8 0 0 0-1-3.5c3 0 6-1.5 6-6.5.08-1.3-.5-2.6-1.5-3.5.1-.5.1-1 0-1.5 0 0-1-.3-3.5 1.5a12.3 12.3 0 0 0-6.5 0c-2.5-1.8-3.5-1.5-3.5-1.5-.1.5-.1 1 0 1.5-.5.9-1.58 2.2-1.5 3.5 0 5 3 6.5 6 6.5a4.8 4.8 0 0 0-1 3.5v4"></path><path d="M9 18c-4.51 2-5-2-7-2"></path></svg>
+                    </a>
+                </div>
+                <!-- Description -->
+                <p class="text-gray-300 max-w-xl mx-auto text-base">
+                    The repository interface for several tools specially aimed at indie game developers, simplifying common development tasks.
+                </p>
+            </div>
+
+            <!-- Tool Widgets -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+
+                <!-- Card 1 -->
+                <div class="animated-card animate-fadeInUp" style="animation-delay: 0.0s;">
+                    <div class="card-bg border rounded-lg shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-[1.02] flex flex-col">
+                        <div class="relative w-full h-48 flex-shrink-0">
+                            <img src="https://placehold.co/400x400/222/FFF?text=CodeBlocks+Tool"
+                                 alt="CodeBlocks tool image"
+                                 class="absolute inset-0 object-cover w-full h-full rounded-t-lg" />
+                            <div class="absolute inset-0 img-overlay rounded-t-lg"></div>
+                        </div>
+                        <div class="p-6 card-content-wrapper"> 
+                            <h3 class="text-lg text-white font-semibold mt-0 mb-2">Tool: Placeholder Title</h3>
+                            <p class="text-gray-300 text-sm mb-4">
+                                A placeholder text description appears here.
+                            </p>
+                            <div class="flex flex-col sm:flex-row gap-4 mt-auto"> Available on GitHub | Itch
+                                 <a href="https://bukkbeek.itch.io/" target="_blank" rel="noopener noreferrer" class="btn-blue border text-sm font-medium hover:text-white transition-colors duration-200 flex items-center justify-center w-full sm:flex-1 px-4 py-2 rounded-md">
+                                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path></svg>
+                                 </a>
+                                 <a href="https://bukkbeek.itch.io/" target="_blank" rel="noopener noreferrer" class="btn-green border text-sm font-medium hover:text-white transition-colors duration-200 flex items-center justify-center w-full sm:flex-1 px-4 py-2 rounded-md">
+                                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" x2="12" y1="15" y2="3"></line></svg>
+                                 </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+
+            </div> <!-- End Grid -->
+        </div> <!-- End Max Width Container -->
+    </div> <!-- End Main Container -->
+
+</body>
+</html>
