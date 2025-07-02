@@ -1,0 +1,781 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Particle Simulator</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Courier New', monospace;
+            background: #1a1a1a;
+            color: #e0e0e0;
+            display: flex;
+            height: 100vh;
+            overflow: hidden;
+        }
+        
+        .control-panel {
+            width: 320px;
+            min-width: 300px;
+            max-width: 420px;
+            background: #2a2a2a;
+            padding: 20px;
+            border-right: 1px solid #404040;
+            height: 100vh;
+            overflow-y: auto;
+            overflow-x: hidden;
+            box-sizing: border-box;
+            flex-shrink: 0;
+        }
+
+        .control-panel h1 {
+            margin: 0 0 2px 0;
+            font-size: 24px;
+            text-align: center;
+        }
+
+        .control-panel .subtitle {
+            font-size: 14px;
+            text-align: center;
+            margin-bottom: 20px;
+            color: #bbbbbb;
+        }
+
+        .canvas-container {
+            flex: 1;
+            display: flex;
+            background: #2d2d2d;
+            overflow: hidden;
+        }
+        
+        canvas {
+            background: #2d2d2d;
+            display: block;
+            width: 100%;
+            height: 100%;
+        }
+        
+        h1 {
+            margin: 0 0 20px 0;
+            font-size: 18px;
+            text-align: center;
+        }
+        
+        .control-row {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+        
+        .control-row.main-controls {
+            gap: 8px;
+        }
+        
+        .control-row.main-controls button {
+            flex: 1 1 0;
+            min-width: 0;
+            font-size: 12px;
+            padding: 8px 4px;
+            overflow: hidden;
+            white-space: nowrap;
+            text-overflow: ellipsis;
+        }
+        
+        /* Responsive button text */
+        @media (max-width: 350px) {
+            .control-row.main-controls button {
+                font-size: 11px;
+            }
+        }
+        
+        
+        /* When panel is narrow, truncate button text */
+        @container (max-width: 280px) {
+            #randomizeBtn::after {
+                content: "Rand..";
+            }
+            #randomizeBtn {
+                text-indent: -9999px;
+                position: relative;
+            }
+        }
+        
+        .control-row.main-controls span {
+            flex: 0 0 auto;
+            font-size: 12px;
+        }
+        
+        .speed-controls {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            flex: 1;
+            min-width: 120px;
+        }
+        
+        .speed-controls input[type="range"] {
+            flex: 1;
+            min-width: 60px;
+            margin: 0;
+        }
+        
+        .speed-controls span {
+            flex: 0 0 auto;
+            width: 30px;
+            text-align: center;
+            font-size: 11px;
+        }
+        
+        .particle-section {
+            border: 1px solid #404040;
+            padding: 15px;
+            margin-bottom: 15px;
+            background: #1f1f1f;
+        }
+        
+        .particle-title {
+            font-weight: bold;
+            margin-bottom: 10px;
+            font-size: 14px;
+        }
+        
+        .particle-header {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            margin-bottom: 15px;
+            flex-wrap: nowrap;
+        }
+        
+        .particle-number {
+            flex: 0 0 auto;
+            font-size: 14px;
+            width: 20px;
+        }
+        
+        .particle-name-input {
+            flex: 0 0 auto;
+            width: 55px;
+            background: #333;
+            color: #e0e0e0;
+            border: 1px solid #555;
+            padding: 4px;
+            font-size: 12px;
+        }
+        
+        input[type="color"] {
+            width: 35px;
+            height: 28px;
+            border: none;
+            cursor: pointer;
+            flex: 0 0 auto;
+        }
+        
+        .particle-count-input {
+            width: 45px;
+            background: #333;
+            color: #e0e0e0;
+            border: 1px solid #555;
+            padding: 4px;
+            flex: 0 0 auto;
+            font-size: 12px;
+        }
+        
+        input[type="checkbox"] {
+            transform: scale(1.2);
+            flex: 0 0 auto;
+        }
+        
+        input[type="range"] {
+            flex: 1;
+            margin: 0 10px;
+        }
+        
+        .slider-row {
+            display: flex;
+            align-items: center;
+            margin-bottom: 8px;
+            font-size: 12px;
+        }
+        
+        .slider-label {
+            width: 40px;
+            text-align: right;
+        }
+        
+        .slider-value {
+            width: 40px;
+            text-align: left;
+        }
+        
+        button {
+            background: #404040;
+            color: #e0e0e0;
+            border: 1px solid #555;
+            padding: 8px 16px;
+            cursor: pointer;
+            font-family: inherit;
+        }
+        
+        button:hover {
+            background: #505050;
+        }
+        
+        button.active {
+            background: #606060;
+        }
+        
+        .randomize-btn {
+            background: #5a4040;
+        }
+        
+        .randomize-btn:hover {
+            background: #6a5050;
+        }
+        
+        /* Responsive design for smaller screens */
+        @media (max-width: 768px) {
+            body {
+                flex-direction: column;
+            }
+            
+            .control-panel {
+                width: 100%;
+                max-width: none;
+                height: 200px;
+                min-height: 150px;
+                max-height: 300px;
+                border-right: none;
+                border-bottom: 1px solid #404040;
+                resize: vertical;
+            }
+            
+            .canvas-container {
+                flex: 1;
+                min-height: 0;
+            }
+        }
+        
+        /* Custom scrollbar for control panel */
+        .control-panel::-webkit-scrollbar {
+            width: 8px;
+        }
+        
+        .control-panel::-webkit-scrollbar-track {
+            background: #1a1a1a;
+        }
+        
+        .control-panel::-webkit-scrollbar-thumb {
+            background: #404040;
+            border-radius: 4px;
+        }
+        
+        .control-panel::-webkit-scrollbar-thumb:hover {
+            background: #505050;
+        }
+    </style>
+</head>
+<body>
+    <div class="control-panel">
+        <h1>Particle Simulator</h1>
+        <div class="subtitle" style="margin-bottom: 5px;">by BUKKBEEK | Claude 4.0</div>
+        <div style="text-align: center; margin-bottom: 20px; font-size: 12px; font-style: italic;">
+            <a href="https://bukkbeek.github.io/" target="_blank" style="color: #bbbbbb; text-decoration: none;">https://bukkbeek.github.io/</a>
+        </div>
+		
+        <div class="control-row main-controls">
+            <button id="startBtn" title="Start simulation">></button>
+            <button id="pauseBtn" title="Pause simulation">||</button>
+            <button id="randomizeBtn" class="randomize-btn" title="Randomize parameters">R</button>
+            <button id="exportBtn" title="Export PNG image">PNG</button>
+            <button id="exportTxtBtn" title="Export TXT file">TXT</button>
+        </div>
+        
+        <div class="control-row">
+            <span style="width: 50px;">Speed:</span>
+            <input type="range" id="speedSlider" min="0" max="2" step="0.1" value="1" style="flex: 1;" title="Simulation Speed">
+            <span id="speedValue" style="width: 30px; text-align: center;">1.0</span>
+        </div>
+        
+        <div class="control-row">
+            <span style="width: 50px;">Force:</span>
+            <input type="range" id="forceSlider" min="0" max="1" step="0.1" value="0.1" style="flex: 1;" title="Force Strength">
+            <span id="forceValue" style="width: 30px; text-align: center;">0.1</span>
+        </div>
+        
+        <div id="particleControls"></div>
+    </div>
+    
+    <div class="canvas-container">
+        <canvas id="canvas"></canvas>
+    </div>
+
+    <script>
+        class ParticleSimulator {
+            constructor() {
+                this.canvas = document.getElementById('canvas');
+                this.ctx = this.canvas.getContext('2d');
+                this.resizeCanvas();
+                
+                this.particles = [];
+                this.isRunning = false;
+                this.speed = 1.0;
+                this.forceMultiplier = 0.1;
+                this.animationId = null;
+                
+                this.particleTypes = [
+                    { name: 'Green', color: '#6b9b6b', count: 100, enabled: true },
+                    { name: 'Red', color: '#b85c5c', count: 100, enabled: true },
+                    { name: 'Yellow', color: '#c4b85c', count: 100, enabled: true },
+                    { name: 'Blue', color: '#5c7bb8', count: 100, enabled: true }
+                ];
+                
+                // Interaction matrix: -1 (repel) to +1 (attract)
+                this.interactions = [
+                    [-0.1, 0.1, -0.2, 0.3],    // Green with [Green, Red, Yellow, Blue]
+                    [0.1, -0.05, 0.15, -0.25], // Red with [Green, Red, Yellow, Blue]
+                    [-0.2, 0.15, -0.15, 0.4],  // Yellow with [Green, Red, Yellow, Blue]
+                    [0.3, -0.25, 0.4, -0.2]    // Blue with [Green, Red, Yellow, Blue]
+                ];
+                
+                this.setupControls();
+                this.initializeParticles();
+                this.setupEventListeners();
+            }
+            
+            setupControls() {
+                const container = document.getElementById('particleControls');
+                
+                this.particleTypes.forEach((type, typeIndex) => {
+                    const section = document.createElement('div');
+                    section.className = 'particle-section';
+                    
+                    // Header row with number, name input, color, count, and checkbox
+                    const headerRow = document.createElement('div');
+                    headerRow.className = 'particle-header';
+                    
+                    const numberLabel = document.createElement('span');
+                    numberLabel.className = 'particle-number';
+                    numberLabel.textContent = `${typeIndex + 1}.`;
+                    
+                    const nameInput = document.createElement('input');
+                    nameInput.type = 'text';
+                    nameInput.value = type.name;
+                    nameInput.className = 'particle-name-input';
+                    nameInput.title = 'Particle type name';
+                    nameInput.addEventListener('input', (e) => {
+                        this.particleTypes[typeIndex].name = e.target.value;
+                        this.updateSliderLabels();
+                    });
+                    
+                    const colorInput = document.createElement('input');
+                    colorInput.type = 'color';
+                    colorInput.value = type.color;
+                    colorInput.title = 'Particle color';
+                    colorInput.addEventListener('change', (e) => {
+                        this.particleTypes[typeIndex].color = e.target.value;
+                        this.updateParticleColors();
+                    });
+                    
+                    const countInput = document.createElement('input');
+                    countInput.type = 'number';
+                    countInput.value = type.count;
+                    countInput.min = '0';
+                    countInput.max = '1000';
+                    countInput.className = 'particle-count-input';
+                    countInput.title = 'Amount of particles';
+                    countInput.addEventListener('change', (e) => {
+                        this.particleTypes[typeIndex].count = parseInt(e.target.value);
+                        this.initializeParticles();
+                    });
+                    
+                    const enabledInput = document.createElement('input');
+                    enabledInput.type = 'checkbox';
+                    enabledInput.checked = type.enabled;
+                    enabledInput.title = 'Enable/disable particle type';
+                    enabledInput.addEventListener('change', (e) => {
+                        this.particleTypes[typeIndex].enabled = e.target.checked;
+                        this.initializeParticles();
+                    });
+                    
+                    headerRow.appendChild(numberLabel);
+                    headerRow.appendChild(nameInput);
+                    headerRow.appendChild(colorInput);
+                    headerRow.appendChild(countInput);
+                    headerRow.appendChild(enabledInput);
+                    section.appendChild(headerRow);
+                    
+                    // Interaction sliders (including self-interaction)
+                    this.particleTypes.forEach((otherType, otherIndex) => {
+                        const sliderRow = document.createElement('div');
+                        sliderRow.className = 'slider-row';
+                        sliderRow.dataset.typeIndex = typeIndex;
+                        sliderRow.dataset.otherIndex = otherIndex;
+                        
+                        const label = document.createElement('span');
+                        label.className = 'slider-label';
+                        label.textContent = otherType.name;
+                        
+                        const slider = document.createElement('input');
+                        slider.type = 'range';
+                        slider.min = '-1';
+                        slider.max = '1';
+                        slider.step = '0.01';
+                        slider.value = this.interactions[typeIndex][otherIndex];
+                        slider.title = `Interaction between particles`;
+                        
+                        const value = document.createElement('span');
+                        value.className = 'slider-value';
+                        const initialValue = parseFloat(slider.value);
+                        value.textContent = initialValue >= 0 ? '+' + initialValue.toFixed(2) : initialValue.toFixed(2);
+                        
+                        slider.addEventListener('input', (e) => {
+                            this.interactions[typeIndex][otherIndex] = parseFloat(e.target.value);
+                            const sliderValue = parseFloat(e.target.value);
+                            value.textContent = sliderValue >= 0 ? '+' + sliderValue.toFixed(2) : sliderValue.toFixed(2);
+                        });
+                        
+                        sliderRow.appendChild(label);
+                        sliderRow.appendChild(slider);
+                        sliderRow.appendChild(value);
+                        section.appendChild(sliderRow);
+                    });
+                    
+                    container.appendChild(section);
+                });
+            }
+            
+            resizeCanvas() {
+                const container = this.canvas.parentElement;
+                const rect = container.getBoundingClientRect();
+                this.canvas.width = rect.width;
+                this.canvas.height = rect.height;
+            }
+            
+            setupEventListeners() {
+                document.getElementById('startBtn').addEventListener('click', () => this.start());
+                document.getElementById('pauseBtn').addEventListener('click', () => this.pause());
+                document.getElementById('randomizeBtn').addEventListener('click', () => this.randomizeInteractions());
+                document.getElementById('exportBtn').addEventListener('click', () => this.export());
+                document.getElementById('exportTxtBtn').addEventListener('click', () => this.exportTxt());
+                
+                const speedSlider = document.getElementById('speedSlider');
+                const speedValue = document.getElementById('speedValue');
+                speedSlider.addEventListener('input', (e) => {
+                    this.speed = parseFloat(e.target.value);
+                    speedValue.textContent = this.speed.toFixed(1);
+                });
+                
+                const forceSlider = document.getElementById('forceSlider');
+                const forceValue = document.getElementById('forceValue');
+                forceSlider.addEventListener('input', (e) => {
+                    this.forceMultiplier = parseFloat(e.target.value);
+                    forceValue.textContent = this.forceMultiplier.toFixed(1);
+                });
+                
+                window.addEventListener('resize', () => {
+                    this.resizeCanvas();
+                });
+            }
+            
+            randomizeInteractions() {
+                // Generate new random interaction values
+                for (let i = 0; i < this.interactions.length; i++) {
+                    for (let j = 0; j < this.interactions[i].length; j++) {
+                        // Generate random value between -1 and 1
+                        this.interactions[i][j] = (Math.random() * 2 - 1);
+                    }
+                }
+                
+                // Update all slider values and displays
+                const container = document.getElementById('particleControls');
+                const sliderRows = container.querySelectorAll('.slider-row');
+                
+                sliderRows.forEach(row => {
+                    const typeIndex = parseInt(row.dataset.typeIndex);
+                    const otherIndex = parseInt(row.dataset.otherIndex);
+                    const slider = row.querySelector('input[type="range"]');
+                    const valueDisplay = row.querySelector('.slider-value');
+                    
+                    const newValue = this.interactions[typeIndex][otherIndex];
+                    slider.value = newValue;
+                    valueDisplay.textContent = newValue >= 0 ? '+' + newValue.toFixed(2) : newValue.toFixed(2);
+                });
+            }
+            
+            initializeParticles() {
+                this.particles = [];
+                
+                this.particleTypes.forEach((type, typeIndex) => {
+                    if (!type.enabled) return;
+                    
+                    for (let i = 0; i < type.count; i++) {
+                        this.particles.push({
+                            x: Math.random() * this.canvas.width,
+                            y: Math.random() * this.canvas.height,
+                            vx: (Math.random() - 0.5) * 2,
+                            vy: (Math.random() - 0.5) * 2,
+                            type: typeIndex,
+                            color: type.color,
+                            radius: 3
+                        });
+                    }
+                });
+            }
+            
+            updateParticleColors() {
+                this.particles.forEach(particle => {
+                    particle.color = this.particleTypes[particle.type].color;
+                });
+            }
+            
+            updateSliderLabels() {
+                const container = document.getElementById('particleControls');
+                const sliderRows = container.querySelectorAll('.slider-row');
+                
+                sliderRows.forEach(row => {
+                    const typeIndex = parseInt(row.dataset.typeIndex);
+                    const otherIndex = parseInt(row.dataset.otherIndex);
+                    const label = row.querySelector('.slider-label');
+                    label.textContent = this.particleTypes[otherIndex].name;
+                });
+            }
+            
+            calculateForces(particle) {
+                let fx = 0, fy = 0;
+                const maxInteractionDistance = 100; // Limit interaction range
+                
+                for (let i = 0; i < this.particles.length; i++) {
+                    const other = this.particles[i];
+                    if (particle === other) continue;
+                    
+                    const dx = other.x - particle.x;
+                    const dy = other.y - particle.y;
+                    
+                    // Quick distance check without sqrt for performance
+                    const distanceSquared = dx * dx + dy * dy;
+                    if (distanceSquared > maxInteractionDistance * maxInteractionDistance) continue;
+                    if (distanceSquared < 1) continue; // Avoid division by zero
+                    
+                    const distance = Math.sqrt(distanceSquared);
+                    const interaction = this.interactions[particle.type][other.type];
+                    
+                    // Use a more stable force calculation
+                    let force;
+                    if (interaction > 0) {
+                        // Attraction - use a force that doesn't go to infinity
+                        const minDistance = 10;
+                        const effectiveDistance = Math.max(distance, minDistance);
+                        force = interaction * 100 / effectiveDistance * this.forceMultiplier;
+                    } else {
+                        // Repulsion - stronger at close range
+                        force = interaction * 1000 / distanceSquared * this.forceMultiplier;
+                    }
+                    
+                    // Normalize direction and apply force
+                    const dirX = dx / distance;
+                    const dirY = dy / distance;
+                    
+                    fx += dirX * force;
+                    fy += dirY * force;
+                }
+                
+                return { fx, fy };
+            }
+            
+            updateParticles() {
+                const maxSpeed = 5;
+                const maxSpeedSquared = maxSpeed * maxSpeed;
+                const dampingFactor = 0.95;
+                const forceMultiplier = 0.1 * this.speed;
+                
+                for (let i = 0; i < this.particles.length; i++) {
+                    const particle = this.particles[i];
+                    const forces = this.calculateForces(particle);
+                    
+                    // Apply forces with damping
+                    particle.vx += forces.fx * forceMultiplier;
+                    particle.vy += forces.fy * forceMultiplier;
+                    
+                    // Apply velocity damping to prevent excessive speeds
+                    particle.vx *= dampingFactor;
+                    particle.vy *= dampingFactor;
+                    
+                    // Limit maximum velocity (avoid sqrt when possible)
+                    const currentSpeedSquared = particle.vx * particle.vx + particle.vy * particle.vy;
+                    if (currentSpeedSquared > maxSpeedSquared) {
+                        const currentSpeed = Math.sqrt(currentSpeedSquared);
+                        particle.vx = (particle.vx / currentSpeed) * maxSpeed;
+                        particle.vy = (particle.vy / currentSpeed) * maxSpeed;
+                    }
+                    
+                    // Update position
+                    particle.x += particle.vx * this.speed;
+                    particle.y += particle.vy * this.speed;
+                    
+                    // Boundary conditions with bounce
+                    if (particle.x < particle.radius) {
+                        particle.x = particle.radius;
+                        particle.vx = Math.abs(particle.vx) * 0.8;
+                    } else if (particle.x > this.canvas.width - particle.radius) {
+                        particle.x = this.canvas.width - particle.radius;
+                        particle.vx = -Math.abs(particle.vx) * 0.8;
+                    }
+                    
+                    if (particle.y < particle.radius) {
+                        particle.y = particle.radius;
+                        particle.vy = Math.abs(particle.vy) * 0.8;
+                    } else if (particle.y > this.canvas.height - particle.radius) {
+                        particle.y = this.canvas.height - particle.radius;
+                        particle.vy = -Math.abs(particle.vy) * 0.8;
+                    }
+                }
+            }
+            
+            render() {
+                this.ctx.fillStyle = '#2d2d2d';
+                this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
+                
+                // Group particles by color to reduce fillStyle changes
+                const particlesByColor = {};
+                for (let i = 0; i < this.particles.length; i++) {
+                    const particle = this.particles[i];
+                    if (!particlesByColor[particle.color]) {
+                        particlesByColor[particle.color] = [];
+                    }
+                    particlesByColor[particle.color].push(particle);
+                }
+                
+                // Render all particles of the same color together
+                for (const color in particlesByColor) {
+                    this.ctx.fillStyle = color;
+                    this.ctx.beginPath();
+                    
+                    const particles = particlesByColor[color];
+                    for (let i = 0; i < particles.length; i++) {
+                        const particle = particles[i];
+                        this.ctx.moveTo(particle.x + particle.radius, particle.y);
+                        this.ctx.arc(particle.x, particle.y, particle.radius, 0, Math.PI * 2);
+                    }
+                    
+                    this.ctx.fill();
+                }
+            }
+            
+            animate() {
+                if (!this.isRunning) return;
+                
+                this.updateParticles();
+                this.render();
+                
+                this.animationId = requestAnimationFrame(() => this.animate());
+            }
+            
+            start() {
+                if (this.isRunning) return;
+                this.isRunning = true;
+                document.getElementById('startBtn').classList.add('active');
+                document.getElementById('pauseBtn').classList.remove('active');
+                this.animate();
+            }
+            
+            pause() {
+                this.isRunning = false;
+                document.getElementById('startBtn').classList.remove('active');
+                document.getElementById('pauseBtn').classList.add('active');
+                if (this.animationId) {
+                    cancelAnimationFrame(this.animationId);
+                }
+            }
+            
+            export() {
+                // Create timestamp for file names
+                const timestamp = new Date().toISOString().replace(/[:.]/g, '-').slice(0, 19);
+                
+                // Create composite image with parameters panel
+                this.exportCompositeImage(timestamp);
+            }
+            
+            exportTxt() {
+                // Create timestamp for file names
+                const timestamp = new Date().toISOString().replace(/[:.]/g, '-').slice(0, 19);
+                
+                // Generate text content
+                let textContent = 'PARTICLE SIMULATOR EXPORT\n';
+                textContent += '=========================\n\n';
+                textContent += `Generated: ${new Date().toLocaleString()}\n\n`;
+                
+                textContent += 'SIMULATION SETTINGS\n';
+                textContent += '==================\n';
+                textContent += `Speed: ${this.speed.toFixed(1)}\n`;
+                textContent += `Force: ${this.forceMultiplier.toFixed(1)}\n`;
+                textContent += `Total Particles: ${this.particles.length}\n`;
+                textContent += `Canvas Size: ${this.canvas.width} x ${this.canvas.height}\n\n`;
+                
+                textContent += 'PARTICLE TYPES\n';
+                textContent += '==============\n';
+                this.particleTypes.forEach((type, i) => {
+                    textContent += `${i + 1}. ${type.name}\n`;
+                    textContent += `   Color: ${type.color}\n`;
+                    textContent += `   Count: ${type.count}\n`;
+                    textContent += `   Enabled: ${type.enabled}\n\n`;
+                });
+                
+                textContent += 'INTERACTION MATRIX\n';
+                textContent += '==================\n';
+                textContent += 'Format: [Row Type] -> [Column Type] = Interaction Value\n';
+                textContent += 'Positive values = Attraction, Negative values = Repulsion\n\n';
+                
+                // Create interaction matrix table
+                textContent += '     ';
+                this.particleTypes.forEach(type => {
+                    textContent += type.name.padEnd(8);
+                });
+                textContent += '\n';
+                
+                this.particleTypes.forEach((rowType, i) => {
+                    textContent += rowType.name.padEnd(5);
+                    this.particleTypes.forEach((colType, j) => {
+                        textContent += this.interactions[i][j].toFixed(2).padEnd(8);
+                    });
+                    textContent += '\n';
+                });
+                
+                textContent += '\nDETAILED INTERACTIONS\n';
+                textContent += '====================\n';
+                this.particleTypes.forEach((rowType, i) => {
+                    textContent += `${rowType.name} interactions:\n`;
+                    this.particleTypes.forEach((colType, j) => {
+                        const value = this.interactions[i][j];
+                        const type = value > 0 ? 'attracts' : value < 0 ? 'repels' : 'neutral';
+                        textContent += `  -> ${colType.name}: ${value.toFixed(3)} (${type})\n`;
+                    });
+                    textContent += '\n';
+                });
+                
+                // Create and download the text file
+                const blob = new Blob([textContent], { type: 'text/plain' });
+                const link = document.createElement('a');
+                link.download = `particle_simulation_${timestamp}.txt`;
+                link.href = URL.createObjectURL(blob);
+                link.click();
+                URL.revokeObjectURL(link.href);
+            }
+            
+			exportCompositeImage(timestamp) {
+				// Export the canvas viewport as-is without scaling
+				const link = document.createElement('a');
+				link.download = `particle_simulation_${timestamp}.png`;
+				link.href = this.canvas.toDataURL();
+				link.click();
+			}
+		}
+        // Initialize the simulator
+        const simulator = new ParticleSimulator();
+    </script>
+</body>
+</html>
